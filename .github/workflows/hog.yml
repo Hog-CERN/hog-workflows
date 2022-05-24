@@ -6,7 +6,9 @@ on:
       PROJECT_NAME:
         required: true
         type: string
-
+    secrets:
+      SUBMODULE_CONTENT_PULL_KEY:
+        required: true
 jobs:
   build:
     runs-on: self-hosted
