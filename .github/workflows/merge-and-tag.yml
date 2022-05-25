@@ -8,7 +8,8 @@ on:
 
 jobs:
   merge:
-    container: node:14.16
+    runs-on: ubuntu-latest
+    container: gitlab-registry.cern.ch/hog/hog-docker:tclsh
     steps:
       - uses: actions/checkout@v2
         with: 
