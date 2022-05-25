@@ -3,17 +3,33 @@ name: Hog
 on:
   workflow_call:
     inputs:
-      PROJECT_NAME:
-        required: true
+      BUILD_PROJECTS:
+        required: false
+        type: string
+      SIM_PROJECTS:
+        required: false
         type: string
     secrets:
       SUBMODULE_CONTENT_PULL_KEY:
         required: true
 jobs:
+ merge:
+    runs-on: ubuntu-latest
+    container: gitlab-registry.cern.ch/hog/hog-docker:tclsh
+    steps:
+      - uses: actions/checkout@v2
+        with: 
+          fetch-depth: 0
+      - uses: webfactory/ssh-agent@v0.5.4
+        with:
+            ssh-private-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
   build:
     runs-on: self-hosted
     env:
       HOG_PATH: /opt/Xilinx/Vivado/2020.2/bin
+    strategy:
+      matrix:
+        PROJECT_NAME: ${{inputs.BUILD_PROJECTS}}
     steps:
       - uses: actions/checkout@v2
         with: 
@@ -30,7 +46,7 @@ jobs:
               git --version
               cd Hog/ && git fetch -p
               cd ..
-              ./Hog/LaunchWorkflow.sh ${{ inputs.PROJECT_NAME }}
+              ./Hog/LaunchWorkflow.sh ${{ matrix.PROJECT_NAME }}
       - name: Archive production artifacts
         uses: actions/upload-artifact@v3
         with:
