@@ -13,7 +13,7 @@ on:
       SUBMODULE_CONTENT_PULL_KEY:
         required: true
 jobs:
- merge:
+  merge:
     runs-on: ubuntu-latest
     container: gitlab-registry.cern.ch/hog/hog-docker:tclsh
     steps:
