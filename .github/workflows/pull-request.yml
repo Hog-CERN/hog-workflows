@@ -30,6 +30,7 @@ jobs:
     strategy:
       matrix:
         PROJECT_NAME: ${{fromJson(inputs.BUILD_PROJECTS)}}
+    needs: merge
     steps:
       - uses: actions/checkout@v2
         with: 
