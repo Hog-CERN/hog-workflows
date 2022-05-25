@@ -29,7 +29,7 @@ jobs:
       HOG_PATH: /opt/Xilinx/Vivado/2020.2/bin
     strategy:
       matrix:
-        PROJECT_NAME: ${{inputs.BUILD_PROJECTS}}
+        PROJECT_NAME: ${{fromJson(inputs.BUILD_PROJECTS)}}
     steps:
       - uses: actions/checkout@v2
         with: 
