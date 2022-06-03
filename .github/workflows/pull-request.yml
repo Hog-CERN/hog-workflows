@@ -45,7 +45,7 @@ jobs:
           echo $COMMIT_MESSAGE
           echo $TARGET_BRANCH
           PULL_PARAMETERS=`curl -H "Accept: application/vnd.github.v3+json" $GITHUB_API_URL/repos/$REPO/pulls/$PR_NUMBER --header  "Authorization: token ${HOG_TOKEN}"`
-          tclsh ./Hog/Tcl/CI/merge_and_tag.tcl -github 1 -mr_par "$PULL_PARAMETERS" -mr_id $PR_NUMBER -push $COMMIT_MESSAGE -main_branch $TARGET_BRANCH -branch_name $SOURCE_BRANCH 
+          tclsh ./Hog/Tcl/CI/merge_and_tag.tcl -github 1 -mr_par "$PULL_PARAMETERS" -mr_id $PR_NUMBER -main_branch $TARGET_BRANCH -source_branch $SOURCE_BRANCH 
   build:
     runs-on: self-hosted
     env:
