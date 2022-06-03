@@ -45,6 +45,7 @@ jobs:
           git config --global user.email "$HOG_MAIL"
           git config --global user.name "$HOG_USER"
           git fetch
+          git checkout $SOURCE_BRANCH
           git submodule init
           git submodule update
           echo $GITHUB_API_URL
