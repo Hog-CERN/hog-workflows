@@ -14,6 +14,11 @@ on:
         required: true
       HOG_TOKEN:
         required: true
+      HOG_MAIL:
+        required: true
+      HOG_USER:
+        required: true
+
 jobs:
   merge:
     env:
@@ -24,6 +29,8 @@ jobs:
       SOURCE_BRANCH: ${{ github.head_ref }}
       TARGET_BRANCH: ${{ github.base_ref }}
       COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+      HOG_USER: ${{ secrets.HOG_USER }}
+      HOG_MAIL: ${{ secrets.HOG_MAIL }}
     runs-on: ubuntu-latest
     container: gitlab-registry.cern.ch/hog/hog-docker:tclsh
     steps:
@@ -35,6 +42,8 @@ jobs:
             ssh-private-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
       - name: merge-and-tag
         run: |
+          git config --global user.email "$HOG_MAIL"
+          git config --global user.name "$HOG_USER"
           git fetch
           git submodule init
           git submodule update
