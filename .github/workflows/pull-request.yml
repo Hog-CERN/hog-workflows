@@ -35,6 +35,8 @@ jobs:
             ssh-private-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
       - name: merge-and-tag
         run: |
+          git submodule init
+          git submodule update --remote
           echo $GITHUB_API_URL
           echo $REPO
           echo $PR_NUMBER
