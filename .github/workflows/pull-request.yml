@@ -21,6 +21,9 @@ jobs:
       HOG_TOKEN: ${{ secrets.HOG_TOKEN }}
       GITHUB_API_URL: ${{github.api_url }}
       REPO: ${{ github.repository }}
+      SOURCE_BRANCH: ${{ github.head_ref }}
+      TARGET_BRANCH: ${{ github.base_ref }}
+      COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
     runs-on: ubuntu-latest
     container: gitlab-registry.cern.ch/hog/hog-docker:tclsh
     steps:
@@ -36,7 +39,7 @@ jobs:
           echo $REPO
           echo $PR_NUMBER
           PULL_PARAMETERS=`curl -H "Accept: application/vnd.github.v3+json" $GITHUB_API_URL/repos/$REPO/pulls/$PR_NUMBER --header  "Authorization: token ${HOG_GITHUB_TOKEN}"`
-
+          tclsh ./Hog/Tcl/CI/merge_and_tag.tcl -mr_par "$PULL_PARAMETERS" -mr_id $PR_NUMBER -push $COMMIT_MESSAGE -main_branch $TARGET_BRANCH -branch_name $SOURCE_BRANCH;
   build:
     runs-on: self-hosted
     env:
