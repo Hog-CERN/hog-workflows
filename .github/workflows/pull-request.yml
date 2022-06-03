@@ -12,6 +12,8 @@ on:
     secrets:
       SUBMODULE_CONTENT_PULL_KEY:
         required: true
+      HOG_TOKEN:
+        required: true
 jobs:
   merge:
     env:
