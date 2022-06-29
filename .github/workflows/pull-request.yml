@@ -136,6 +136,7 @@ jobs:
               git fetch -p
               git --version
               cd Hog/ && git fetch -p
+              git describe
               cd ..
               ./Hog/Other/CheckEnv.sh
               if [[ -v HOG_CHECK_PROJVER ]] && [[ $HOG_CHECK_PROJVER == '1' ]]; then
