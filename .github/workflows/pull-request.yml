@@ -143,12 +143,13 @@ jobs:
               git describe
               cd ..
               ./Hog/Other/CheckEnv.sh
+              echo "ciao"
               if [[ -v HOG_CHECK_PROJVER ]] && [[ $HOG_CHECK_PROJVER == '1' ]]; then
-              if [[ -v HOG_EXTERNAL_PATH ]]; then
-                ./Hog/Other/CheckProjVer.sh -ext_path "$HOG_EXTERNAL_PATH" $PROJECT_NAME;
-              else
-                ./Hog/Other/CheckProjVer.sh $PROJECT_NAME;
-              fi;
+                if [[ -v HOG_EXTERNAL_PATH ]]; then
+                  ./Hog/Other/CheckProjVer.sh -ext_path "$HOG_EXTERNAL_PATH" $PROJECT_NAME;
+                else
+                  ./Hog/Other/CheckProjVer.sh $PROJECT_NAME;
+                fi;
               else
                 echo "Project version checker is disabled.";
               fi
