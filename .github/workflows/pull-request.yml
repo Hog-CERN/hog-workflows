@@ -18,7 +18,12 @@ on:
         required: true
       HOG_USER:
         required: true
-
+      HOG_PATH:
+        required: true
+      HOG_EXTERNAL_PATH:
+        required: false
+      HOG_CHECK_PROJVER:
+        required: false
 jobs:
   merge:
     env:
@@ -56,10 +61,12 @@ jobs:
           echo $TARGET_BRANCH
           PULL_PARAMETERS=`curl -H "Accept: application/vnd.github.v3+json" $GITHUB_API_URL/repos/$REPO/pulls/$PR_NUMBER --header  "Authorization: token ${HOG_TOKEN}"`
           tclsh ./Hog/Tcl/CI/merge_and_tag.tcl -github 1 -mr_par "$PULL_PARAMETERS" -mr_id $PR_NUMBER -main_branch $TARGET_BRANCH -source_branch $SOURCE_BRANCH 
-  build:
+  generate_project:
     runs-on: self-hosted
     env:
-      HOG_PATH: /opt/Xilinx/Vivado/2020.2/bin
+      HOG_PATH: ${{ secrets.HOG_PATH }}
+      HOG_EXTERNAL_PATH: ${{ secrets.HOG_EXTERNAL_PATH }}
+      HOG_CHECK_PROJVER: ${{ secrets.HOG_CHECK_PROJVER }}
     strategy:
       matrix:
         PROJECT_NAME: ${{fromJson(inputs.BUILD_PROJECTS)}}
@@ -71,7 +78,7 @@ jobs:
       - uses: webfactory/ssh-agent@v0.5.4
         with:
             ssh-private-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
-      - name: Hog
+      - name: Build
         run: |
               git submodule init
               git submodule update --remote
@@ -80,6 +87,16 @@ jobs:
               git --version
               cd Hog/ && git fetch -p
               cd ..
+              ./Hog/Other/CheckEnv.sh
+              if [[ -v HOG_CHECK_PROJVER ]] && [[ $HOG_CHECK_PROJVER == '1' ]]; then
+              if [[ -v HOG_EXTERNAL_PATH ]]; then
+                ./Hog/Other/CheckProjVer.sh -ext_path "$HOG_EXTERNAL_PATH" $PROJECT_NAME;
+              else
+                ./Hog/Other/CheckProjVer.sh $PROJECT_NAME;
+              fi;
+              else
+                echo "Project version checker is disabled.";
+              fi
               ./Hog/LaunchWorkflow.sh ${{ matrix.PROJECT_NAME }}
       - name: Archive production artifacts
         uses: actions/upload-artifact@v3
@@ -87,3 +104,34 @@ jobs:
           name: Create artifacts
           path: |
             Projects
+  # simulate_project:
+  #   runs-on: self-hosted
+  #   env:
+  #     HOG_PATH: /opt/Xilinx/Vivado/2020.2/bin
+  #   strategy:
+  #     matrix:
+  #       PROJECT_NAME: ${{fromJson(inputs.SIM_PROJECTS)}}
+  #   needs: merge
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #       with: 
+  #         fetch-depth: 0
+  #     - uses: webfactory/ssh-agent@v0.5.4
+  #       with:
+  #           ssh-private-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
+  #     - name: Hog
+  #       run: |
+  #             git submodule init
+  #             git submodule update --remote
+  #             export PATH=${HOG_PATH}:$PATH
+  #             git fetch -p
+  #             git --version
+  #             cd Hog/ && git fetch -p
+  #             cd ..
+  #             ./Hog/LaunchWorkflow.sh ${{ matrix.PROJECT_NAME }}
+  #     - name: Archive production artifacts
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: Create artifacts
+  #         path: |
+  #           Projects
