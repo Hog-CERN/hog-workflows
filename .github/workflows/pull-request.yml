@@ -12,9 +12,9 @@ on:
     secrets:
       SUBMODULE_CONTENT_PULL_KEY:
         required: true
-      HOG_TOKEN:
+      HOG_PUSH_TOKEN:
         required: true
-      HOG_MAIL:
+      HOG_EMAIL:
         required: true
       HOG_USER:
         required: true
@@ -24,21 +24,68 @@ on:
         required: false
       HOG_CHECK_PROJVER:
         required: false
-
+      HOG_XIL_LICENSE:
+        required: false
+      EOS_MGM_URL:
+        required: false
+      HOG_LD_LIBRARY_PATH:
+        required: false
+      HOG_SIMULATION_LIB_PATH:
+        required: false
+      HOG_OFFICIAL_BIN_EOS_PATH:
+        required: false
+      HOG_CHECK_SYNTAX:
+        required: false
+      HOG_CHECK_YAMLREF:
+        required: false
+      HOG_NO_BITSTREAM:
+        required: false
+      HOG_NO_RESET_BD:
+        required: false
+      HOG_IP_PATH:
+        required: false
+      HOG_RESET_FILES:
+        required: false
+      HOG_TARGET_BRANCH:
+        required: false
+      HOG_CREATE_OFFICIAL_RELEASE:
+        required: false
+      HOG_NJOBS:
+        required: false
+      HOG_IP_NJOBS:
+        required: false
+      HOG_USE_DOXYGEN:
+        required: false
 
 env:
   PR_NUMBER: ${{ github.event.number }}
-  HOG_TOKEN: ${{ secrets.HOG_TOKEN }}
+  HOG_PUSH_TOKEN: ${{ secrets.HOG_PUSH_TOKEN }}
   GITHUB_API_URL: ${{github.api_url }}
   REPO: ${{ github.repository }}
   SOURCE_BRANCH: ${{ github.head_ref }}
   TARGET_BRANCH: ${{ github.base_ref }}
   COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
   HOG_USER: ${{ secrets.HOG_USER }}
-  HOG_MAIL: ${{ secrets.HOG_MAIL }}
+  HOG_EMAIL: ${{ secrets.HOG_EMAIL }}
   HOG_PATH: ${{ secrets.HOG_PATH }}
   HOG_EXTERNAL_PATH: ${{ secrets.HOG_EXTERNAL_PATH }}
   HOG_CHECK_PROJVER: ${{ secrets.HOG_CHECK_PROJVER }}
+  HOG_XIL_LICENSE: ${{ secrets.HOG_XIL_LICENSE }}
+  EOS_MGM_URL: ${{ secrets.EOS_MGM_URL }}
+  HOG_LD_LIBRARY_PATH: ${{ secrets.HOG_LD_LIBRARY_PATH }}
+  HOG_SIMULATION_LIB_PATH: ${{ secrets.HOG_SIMULATION_LIB_PATH }}
+  HOG_OFFICIAL_BIN_EOS_PATH: ${{ secrets.HOG_OFFICIAL_BIN_EOS_PATH }}
+  HOG_CHECK_SYNTAX: ${{ secrets.HOG_CHECK_SYNTAX }}
+  HOG_CHECK_YAMLREF: ${{ secrets.HOG_CHECK_YAMLREF }}
+  HOG_NO_BITSTREAM: ${{ secrets.HOG_NO_BITSTREAM }}
+  HOG_NO_RESET_BD: ${{ secrets.HOG_NO_RESET_BD }}
+  HOG_IP_PATH: ${{ secrets.HOG_IP_PATH }}
+  HOG_RESET_FILES: ${{ secrets.HOG_RESET_FILES }}
+  HOG_TARGET_BRANCH: ${{ secrets.HOG_TARGET_BRANCH }}
+  HOG_CREATE_OFFICIAL_RELEASE: ${{ secrets.HOG_CREATE_OFFICIAL_RELEASE }}
+  HOG_NJOBS: ${{ secrets.HOG_NJOBS }}
+  HOG_IP_NJOBS: ${{ secrets.HOG_IP_NJOBS }}
+  HOG_USE_DOXYGEN: ${{ secrets.HOG_USE_DOXYGEN }}
 
 
 jobs:
@@ -54,7 +101,7 @@ jobs:
             ssh-private-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
       - name: merge-and-tag
         run: |
-          git config --global user.email "$HOG_MAIL"
+          git config --global user.email "$HOG_EMAIL"
           git config --global user.name "$HOG_USER"
           git fetch
           git checkout $SOURCE_BRANCH
@@ -66,7 +113,7 @@ jobs:
           echo $SOURCE_BRANCH
           echo $COMMIT_MESSAGE
           echo $TARGET_BRANCH
-          PULL_PARAMETERS=`curl -H "Accept: application/vnd.github.v3+json" $GITHUB_API_URL/repos/$REPO/pulls/$PR_NUMBER --header  "Authorization: token ${HOG_TOKEN}"`
+          PULL_PARAMETERS=`curl -H "Accept: application/vnd.github.v3+json" $GITHUB_API_URL/repos/$REPO/pulls/$PR_NUMBER --header  "Authorization: token ${HOG_PUSH_TOKEN}"`
           tclsh ./Hog/Tcl/CI/merge_and_tag.tcl -github 1 -mr_par "$PULL_PARAMETERS" -mr_id $PR_NUMBER -main_branch $TARGET_BRANCH -source_branch $SOURCE_BRANCH -push $SOURCE_BRANCH
   generate_project:
     runs-on: self-hosted      
