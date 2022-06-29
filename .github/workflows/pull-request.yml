@@ -24,18 +24,25 @@ on:
         required: false
       HOG_CHECK_PROJVER:
         required: false
+
+
+env:
+  PR_NUMBER: ${{ github.event.number }}
+  HOG_TOKEN: ${{ secrets.HOG_TOKEN }}
+  GITHUB_API_URL: ${{github.api_url }}
+  REPO: ${{ github.repository }}
+  SOURCE_BRANCH: ${{ github.head_ref }}
+  TARGET_BRANCH: ${{ github.base_ref }}
+  COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+  HOG_USER: ${{ secrets.HOG_USER }}
+  HOG_MAIL: ${{ secrets.HOG_MAIL }}
+  HOG_PATH: ${{ secrets.HOG_PATH }}
+  HOG_EXTERNAL_PATH: ${{ secrets.HOG_EXTERNAL_PATH }}
+  HOG_CHECK_PROJVER: ${{ secrets.HOG_CHECK_PROJVER }}
+
+
 jobs:
   merge:
-    env:
-      PR_NUMBER: ${{ github.event.number }}
-      HOG_TOKEN: ${{ secrets.HOG_TOKEN }}
-      GITHUB_API_URL: ${{github.api_url }}
-      REPO: ${{ github.repository }}
-      SOURCE_BRANCH: ${{ github.head_ref }}
-      TARGET_BRANCH: ${{ github.base_ref }}
-      COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
-      HOG_USER: ${{ secrets.HOG_USER }}
-      HOG_MAIL: ${{ secrets.HOG_MAIL }}
     runs-on: ubuntu-latest
     container: gitlab-registry.cern.ch/hog/hog-docker:tclsh
     steps:
@@ -60,13 +67,9 @@ jobs:
           echo $COMMIT_MESSAGE
           echo $TARGET_BRANCH
           PULL_PARAMETERS=`curl -H "Accept: application/vnd.github.v3+json" $GITHUB_API_URL/repos/$REPO/pulls/$PR_NUMBER --header  "Authorization: token ${HOG_TOKEN}"`
-          tclsh ./Hog/Tcl/CI/merge_and_tag.tcl -github 1 -mr_par "$PULL_PARAMETERS" -mr_id $PR_NUMBER -main_branch $TARGET_BRANCH -source_branch $SOURCE_BRANCH 
+          tclsh ./Hog/Tcl/CI/merge_and_tag.tcl -github 1 -mr_par "$PULL_PARAMETERS" -mr_id $PR_NUMBER -main_branch $TARGET_BRANCH -source_branch $SOURCE_BRANCH -push $SOURCE_BRANCH
   generate_project:
-    runs-on: self-hosted
-    env:
-      HOG_PATH: ${{ secrets.HOG_PATH }}
-      HOG_EXTERNAL_PATH: ${{ secrets.HOG_EXTERNAL_PATH }}
-      HOG_CHECK_PROJVER: ${{ secrets.HOG_CHECK_PROJVER }}
+    runs-on: self-hosted      
     strategy:
       matrix:
         PROJECT_NAME: ${{fromJson(inputs.BUILD_PROJECTS)}}
