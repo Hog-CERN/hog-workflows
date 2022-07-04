@@ -294,9 +294,9 @@ jobs:
       - uses: webfactory/ssh-agent@v0.5.4
         with:
             ssh-private-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
-      # - name: collect
-      #   run: |
-      #         old_dir=`pwd`
+      - name: collect
+        run: |
+              old_dir=`pwd`
       #         mkdir -p bin
       #         printf "## Repository info\n- Pull request number: $PR_NUMBER\n- Branch name: $SOURCE_BRANCH\n\n" > bin/note.md
       #         ./Hog/Other/Changelog.sh -t $TARGET_BRANCH -pt $HOG_PUSH_TOKEN -r $REPO -github -n $PR_NUMBER >> bin/note.md
