@@ -136,11 +136,12 @@ jobs:
               git checkout $SOURCE_BRANCH
               git submodule init
               git submodule update
+              export XILINXD_LICENSE_FILE=${HOG_XIL_LICENSE}
+              export PATH=${HOG_PATH}:$PATH
+              export LD_LIBRARY_PATH=${HOG_LD_LIBRARY_PATH}:$LD_LIBRARY_PATH
               export PATH=${HOG_PATH}:$PATH
               git fetch -p
-              git --version
               cd Hog/ && git fetch -p
-              git describe
               cd ..
               ./Hog/Other/CheckEnv.sh
               PROJECT_NAME=${{ matrix.PROJECT_NAME}}
@@ -225,45 +226,68 @@ jobs:
         with:
           name: Create artifacts
           path: |
+            bin
+  simulate_project:
+    runs-on: self-hosted
+    strategy:
+      matrix:
+        PROJECT_NAME: ${{fromJson(inputs.SIM_PROJECTS)}}
+    needs: merge
+    steps:
+      - uses: actions/checkout@v2
+        with: 
+          fetch-depth: 0
+      - uses: webfactory/ssh-agent@v0.5.4
+        with:
+            ssh-private-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
+      - name: Hog
+        run: |
+              git config --global user.email "$HOG_EMAIL"
+              git config --global user.name "$HOG_USER"
+              git fetch
+              git checkout $SOURCE_BRANCH
+              git submodule init
+              git submodule update
+              export XILINXD_LICENSE_FILE=${HOG_XIL_LICENSE}
+              export PATH=${HOG_PATH}:$PATH
+              export LD_LIBRARY_PATH=${HOG_LD_LIBRARY_PATH}:$LD_LIBRARY_PATH
+              export PATH=${HOG_PATH}:$PATH
+              git fetch -p
+              cd Hog/ && git fetch -p
+              cd ..
+              PROJECT_NAME=${matrix.SIM_PROJECTS}
+              if [[ -v HOG_CHECK_PROJVER ]] && [[ $HOG_CHECK_PROJVER == '1' ]]; then
+                if [[ -z "$HOG_EXTERNAL_PATH" ]]; then
+                  ./Hog/Other/CheckProjVer.sh $PROJECT_NAME;
+                else
+                  ./Hog/Other/CheckProjVer.sh -ext_path "$HOG_EXTERNAL_PATH" $PROJECT_NAME;
+                fi;
+              else
+                echo "Project version checker is disabled.";
+              fi;
+              if [ -f "./Projects/$PROJECT_NAME/skip.me" ]; then
+                echo "CI disabled for $PROJECT_NAME";
+              else
+                if [ -z "$HOG_SIMULATION_LIB_PATH}" ]; then
+                  echo 'Simulation library path is not defined';
+                  ./Hog/LaunchSimulation.sh $PROJECT_NAME
+                else
+                   ./Hog/LaunchSimulation.sh $PROJECT_NAME -l $HOG_SIMULATION_LIB_PATH ;
+                fi;
+              fi
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: Create artifacts
+          path: |
             Projects
-  # simulate_project:
-  #   runs-on: self-hosted
-  #   env:
-  #     HOG_PATH: /opt/Xilinx/Vivado/2020.2/bin
-  #   strategy:
-  #     matrix:
-  #       PROJECT_NAME: ${{fromJson(inputs.SIM_PROJECTS)}}
-  #   needs: merge
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #       with: 
-  #         fetch-depth: 0
-  #     - uses: webfactory/ssh-agent@v0.5.4
-  #       with:
-  #           ssh-private-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
-  #     - name: Hog
-  #       run: |
-  #             git submodule init
-  #             git submodule update --remote
-  #             export PATH=${HOG_PATH}:$PATH
-  #             git fetch -p
-  #             git --version
-  #             cd Hog/ && git fetch -p
-  #             cd ..
-  #             ./Hog/LaunchWorkflow.sh ${{ matrix.PROJECT_NAME }}
-  #     - name: Archive production artifacts
-  #       uses: actions/upload-artifact@v3
-  #       with:
-  #         name: Create artifacts
-  #         path: |
-  #           Projects
 
-                # if [[ -v HOG_CHECK_PROJVER ]] && [[ $HOG_CHECK_PROJVER == '1' ]]; then
-              #   if [[ -v HOG_EXTERNAL_PATH ]]; then
-              #     ./Hog/Other/CheckProjVer.sh -ext_path "$HOG_EXTERNAL_PATH" $PROJECT_NAME;
-              #   else
-              #     ./Hog/Other/CheckProjVer.sh $PROJECT_NAME;
-              #   fi;
-              # else
-              #   echo "Project version checker is disabled.";
-              # fi
+                if [[ -v HOG_CHECK_PROJVER ]] && [[ $HOG_CHECK_PROJVER == '1' ]]; then
+                if [[ -v HOG_EXTERNAL_PATH ]]; then
+                  ./Hog/Other/CheckProjVer.sh -ext_path "$HOG_EXTERNAL_PATH" $PROJECT_NAME;
+                else
+                  ./Hog/Other/CheckProjVer.sh $PROJECT_NAME;
+                fi;
+              else
+                echo "Project version checker is disabled.";
+              fi
