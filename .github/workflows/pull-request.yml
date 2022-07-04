@@ -152,7 +152,7 @@ jobs:
                 fi;
               else
                 echo "Project version checker is disabled.";
-              fi
+              fi;
               if [ -f "./Projects/$PROJECT_NAME/skip.me" ]; then
                 echo "Hog-CI(info) - CI disabled for $PROJECT_NAME";
               else
@@ -219,6 +219,7 @@ jobs:
                 echo "Hog-CI(info) - Launching workflow now...";
                 echo "./Hog/LaunchWorkflow.sh -njobs $HOG_NJOBS $IP_PATH $NO_BITSTREAM $ONLY_SYNTH $CHECK_SYNTAX $PROJECT_NAME";
                 ./Hog/LaunchWorkflow.sh -njobs $HOG_NJOBS $IP_PATH $NO_BITSTREAM $ONLY_SYNTH $CHECK_SYNTAX $PROJECT_NAME;
+              fi;
       - name: Archive production artifacts
         uses: actions/upload-artifact@v3
         with:
