@@ -103,7 +103,7 @@ jobs:
         run: |
           git config --global user.email "$HOG_EMAIL"
           git config --global user.name "$HOG_USER"
-          git fetch
+          git fetch 
           git checkout $SOURCE_BRANCH
           git submodule init
           git submodule update
@@ -132,7 +132,7 @@ jobs:
         run: |
               git config --global user.email "$HOG_EMAIL"
               git config --global user.name "$HOG_USER"
-              git fetch
+              git fetch --no-recurse-submodules
               git checkout $SOURCE_BRANCH
               git submodule init
               git submodule update
