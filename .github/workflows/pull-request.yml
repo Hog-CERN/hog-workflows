@@ -257,7 +257,7 @@ jobs:
               git fetch -p
               cd Hog/ && git fetch -p
               cd ..
-              PROJECT_NAME=${{matrix.SIM_PROJECTS}}
+              PROJECT_NAME=${{ matrix.SIM_PROJECTS }}
               if [[ -v HOG_CHECK_PROJVER ]] && [[ $HOG_CHECK_PROJVER == '1' ]]; then
                 if [[ -z "$HOG_EXTERNAL_PATH" ]]; then
                   ./Hog/Other/CheckProjVer.sh $PROJECT_NAME;
@@ -295,6 +295,7 @@ jobs:
         with:
             ssh-private-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
       - name: collect
+        continue-on-error: true
         run: |
               old_dir=`pwd`
               mkdir -p bin
@@ -330,3 +331,35 @@ jobs:
               if [[ -z "$HOG_MR_MSG" ]] || [[ $HOG_MR_MSG == '1' ]] || [[ $HOG_MR_MSG == '2' ]]; then
               echo "Hog-CI(info) - Writing note on GitHub website...";
               ./Hog/Other/WriteGithubNote.sh $HOG_PUSH_TOKEN $CI_API_V4_URL $CI_PROJECT_ID $CI_MERGE_REQUEST_IID mr_note.md;
+  check_timing:
+    runs-on: ubuntu-latest
+    container: gitlab-registry.cern.ch/hog/hog-docker:tclsh
+    needs: [generate_project]
+    steps:
+      - uses: actions/checkout@v2
+        with: 
+          fetch-depth: 0
+      - uses: webfactory/ssh-agent@v0.5.4
+        with:
+            ssh-private-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
+      - name: Check Timing
+        continue-on-error: true
+        run: |
+            cd bin/
+            PRJ_BITS=$(find . -iname "versions.txt")
+            FAILED_PRJS=""
+            for PRJ_BIT in ${PRJ_BITS}; do
+              PRJ_DIR=$(dirname "$PRJ_BIT");
+              PRJ_NAME="${PRJ_DIR%.*}";
+              PRJ_NAME="${PRJ_NAME%-*}";
+              PRJ_NAME_BASE=$(basename $PRJ_NAME);
+              if [ -f "$PRJ_DIR/timing_error.txt" ]; then
+                FAILED_PRJS="$FAILED_PRJS $PRJ_NAME_BASE";
+              fi;
+            done;
+            if [ "$FAILED_PRJS" != "" ]; then
+              echo "The following projects have failed timing:$FAILED_PRJS";
+              exit 1;
+            else
+              echo "All projects met timing. All good!";
+            fi;
