@@ -86,8 +86,8 @@ env:
   HOG_NJOBS: ${{ secrets.HOG_NJOBS }}
   HOG_IP_NJOBS: ${{ secrets.HOG_IP_NJOBS }}
   HOG_USE_DOXYGEN: ${{ secrets.HOG_USE_DOXYGEN }}
-  GH_TOKEN: ${{ secrets.$HOG_PUSH_TOKEN }}
-  HOG_PR_MSG: ${{ secrets.$HOG_PR_MSG}}
+  GH_TOKEN: ${{ secrets.HOG_PUSH_TOKEN }}
+  HOG_PR_MSG: ${{ secrets.HOG_PR_MSG }}
 
 
 jobs:
