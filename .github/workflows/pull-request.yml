@@ -285,7 +285,7 @@ jobs:
             Projects
   collect_artifacts:
     runs-on: ubuntu-latest
-    needs: generate_project
+    needs: [generate_project, simulate_project]
     container: gitlab-registry.cern.ch/hog/hog-docker:tclsh
     steps:
       - uses: actions/checkout@v2
