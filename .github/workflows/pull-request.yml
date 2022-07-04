@@ -292,7 +292,7 @@ jobs:
           fetch-depth: 0
       - uses: webfactory/ssh-agent@v0.5.4
         with:
-            ssh-private-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
+          ssh-private-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
       - name: collect
         run: |
               old_dir=`pwd`
