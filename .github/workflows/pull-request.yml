@@ -86,6 +86,8 @@ env:
   HOG_NJOBS: ${{ secrets.HOG_NJOBS }}
   HOG_IP_NJOBS: ${{ secrets.HOG_IP_NJOBS }}
   HOG_USE_DOXYGEN: ${{ secrets.HOG_USE_DOXYGEN }}
+  GH_TOKEN: ${{ secrets.$HOG_PUSH_TOKEN }}
+  HOG_PR_MSG: ${{ secrets.$HOG_PR_MSG}}
 
 
 jobs:
@@ -281,13 +283,45 @@ jobs:
           name: Create artifacts
           path: |
             Projects
-
-                if [[ -v HOG_CHECK_PROJVER ]] && [[ $HOG_CHECK_PROJVER == '1' ]]; then
-                if [[ -v HOG_EXTERNAL_PATH ]]; then
-                  ./Hog/Other/CheckProjVer.sh -ext_path "$HOG_EXTERNAL_PATH" $PROJECT_NAME;
-                else
-                  ./Hog/Other/CheckProjVer.sh $PROJECT_NAME;
+  collect_artifacts:
+    runs-on: ubuntu-latest
+    container: gitlab-registry.cern.ch/hog/hog-docker:tclsh
+    steps:
+       - uses: actions/checkout@v2
+          with: 
+            fetch-depth: 0
+        - uses: webfactory/ssh-agent@v0.5.4
+          with:
+              ssh-private-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
+        - name: collect
+          run: |
+                old_dir=`pwd`
+                mkdir -p bin
+                printf "## Repository info\n- Pull request number: $PR_NUMBER\n- Branch name: $SOURCE_BRANCH\n\n" > bin/note.md
+                ./Hog/Other/Changelog.sh -t $TARGET_BRANCH -pt $HOG_PUSH_TOKEN -r $REPO -github -n $PR_NUMBER >> bin/note.md
+                cd bin
+                diff_files=$(find . -name "diff_list*.txt");
+                touch $old_dir/pr_note.md
+                echo "Pipeline $GITHUB_RUN_ID passed for pull request #$PR_NUMBER" >> $old_dir/pr_note.md
+                if [[ $diff_files != "" ]]; then
+                  echo "## Uncommitted differences" >> $old_dir/pr_note.md;
+                  echo "## Uncommitted differences" >> bin/note.md;
+                  for f in $diff_files; do
+                    echo "Found uncommitted differences, check log file bin/$f in the artifacts." >> $old_dir/pr_note.md;
+                    echo "" >> $old_dir/pr_note.md;
+                    echo "Found uncommitted differences, check log file bin/$f in the artifacts." >> $bin/note.md;
+                    echo "" >> $bin/note.md;
+                  done;
+                fi
+                note_files="versions timing utilization";
+                for f in $note_files; do
+                files=$(find . -name "$f*.txt");
+                if (( ${#files} )); then
+                  for fp in $files; do
+                    if [[ $HOG_PR_MSG == '1' ]]; then
+                      cat $fp >> $old_dir/mr_note.md;
+                    fi;
+                    cat $fp >> $bin/note.md;
+                  done;
                 fi;
-              else
-                echo "Project version checker is disabled.";
-              fi
+              done;
