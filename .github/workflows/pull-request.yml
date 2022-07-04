@@ -145,6 +145,7 @@ jobs:
               ./Hog/Other/CheckEnv.sh
               echo "ciao"
               echo ${{ matrix.PROJECT_NAME}}
+              echo "./Hog/LaunchWorkflow.sh -njobs $HOG_NJOBS $IP_PATH $HOG_NO_BITSTREAM $ONLY_SYNTH $HOG_CHECK_SYNTAX ${{ matrix.PROJECT_NAME }}";
               ./Hog/LaunchWorkflow.sh ${{ matrix.PROJECT_NAME }}
       - name: Archive production artifacts
         uses: actions/upload-artifact@v3
