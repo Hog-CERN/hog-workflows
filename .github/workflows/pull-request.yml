@@ -122,6 +122,10 @@ jobs:
         PROJECT_NAME: ${{fromJson(inputs.BUILD_PROJECTS)}}
     needs: merge
     steps:
+      - name: clean 
+        run: |
+          echo "Cleaning up previous run"
+          rm -rf "${{ github.workspace }}"
       - uses: actions/checkout@v2
         with: 
           fetch-depth: 0
@@ -132,7 +136,7 @@ jobs:
         run: |
               git config --global user.email "$HOG_EMAIL"
               git config --global user.name "$HOG_USER"
-              git fetch --no-recurse-submodules
+              git fetch
               git checkout $SOURCE_BRANCH
               git submodule init
               git submodule update
