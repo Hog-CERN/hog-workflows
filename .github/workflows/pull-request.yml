@@ -122,10 +122,6 @@ jobs:
         PROJECT_NAME: ${{fromJson(inputs.BUILD_PROJECTS)}}
     needs: merge
     steps:
-      - name: clean 
-        run: |
-          echo "Cleaning up previous run"
-          rm -rf "${{ github.workspace }}"
       - uses: actions/checkout@v2
         with: 
           fetch-depth: 0
