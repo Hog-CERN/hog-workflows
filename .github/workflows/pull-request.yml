@@ -120,7 +120,6 @@ jobs:
   make_doxygen:
     runs-on: ubuntu-latest
     container: gitlab-registry.cern.ch/hog/hog-docker:doxygen
-    stage: generation_and_simulation
     needs: merge
     if: env.HOG_USE_DOXYGEN == '1'
     steps:
