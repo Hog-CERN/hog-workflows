@@ -270,7 +270,7 @@ jobs:
               if [ -f "./Projects/$PROJECT_NAME/skip.me" ]; then
                 echo "CI disabled for $PROJECT_NAME";
               else
-                if [ -z "$HOG_SIMULATION_LIB_PATH}" ]; then
+                if [ -z "$HOG_SIMULATION_LIB_PATH" ]; then
                   echo 'Simulation library path is not defined';
                   ./Hog/LaunchSimulation.sh $PROJECT_NAME
                 else
