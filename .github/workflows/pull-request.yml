@@ -132,6 +132,11 @@ jobs:
             ssh-private-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
       - name: Build
         run: |
+              PROJECT_NAME=${{ matrix.PROJECT_NAME}}
+              if [ -z "$PROJECT_NAME" ]; then
+                echo "Hog-CI(info): No projects will be built. Exiting..."
+                exit 0;
+              fi;
               git config --global user.email "$HOG_EMAIL"
               git config --global user.name "$HOG_USER"
               git fetch
@@ -146,7 +151,6 @@ jobs:
               cd Hog/ && git fetch -p
               cd ..
               ./Hog/Other/CheckEnv.sh
-              PROJECT_NAME=${{ matrix.PROJECT_NAME}}
               if [[ -v HOG_CHECK_PROJVER ]] && [[ $HOG_CHECK_PROJVER == '1' ]]; then
                 if [[ -z "$HOG_EXTERNAL_PATH" ]]; then
                   ./Hog/Other/CheckProjVer.sh $PROJECT_NAME;
