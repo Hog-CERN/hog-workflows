@@ -9,6 +9,9 @@ on:
       SIM_PROJECTS:
         required: false
         type: string
+      HOG_USE_DOXYGEN:
+        required: false
+        type: string
     secrets:
       SUBMODULE_CONTENT_PULL_KEY:
         required: true
@@ -53,8 +56,6 @@ on:
       HOG_NJOBS:
         required: false
       HOG_IP_NJOBS:
-        required: false
-      HOG_USE_DOXYGEN:
         required: false
 
 env:
@@ -121,7 +122,7 @@ jobs:
     runs-on: ubuntu-latest
     container: gitlab-registry.cern.ch/hog/hog-docker:doxygen
     needs: merge
-    if: ${{ secrets.HOG_USE_DOXYGEN == '1' }}
+    if: ${{ inputs.HOG_USE_DOXYGEN == '1' }}
     steps:
       - uses: actions/checkout@v2
         with: 
@@ -145,7 +146,8 @@ jobs:
           path: |
             Doc
   generate_project:
-    runs-on: self-hosted      
+    runs-on: self-hosted
+    if: ${{ inputs.BUILD_PROJECTS }}   
     strategy:
       matrix:
         PROJECT_NAME: ${{fromJson(inputs.BUILD_PROJECTS)}}
@@ -262,6 +264,7 @@ jobs:
             bin
   simulate_project:
     runs-on: self-hosted
+    if: ${{ inputs.SIM_PROJECTS }}   
     strategy:
       matrix:
         PROJECT_NAME: ${{fromJson(inputs.SIM_PROJECTS)}}
@@ -316,6 +319,7 @@ jobs:
             Projects
   collect_artifacts:
     runs-on: ubuntu-latest
+    if: ${{ inputs.BUILD_PROJECTS || inputs.SIM_PROJECTS }}   
     needs: [generate_project, simulate_project]
     container: gitlab-registry.cern.ch/hog/hog-docker:tclsh
     steps:
@@ -365,6 +369,7 @@ jobs:
   check_timing:
     runs-on: ubuntu-latest
     container: gitlab-registry.cern.ch/hog/hog-docker:tclsh
+    if: ${{ inputs.BUILD_PROJECTS }}   
     needs: [generate_project]
     steps:
       - uses: actions/checkout@v2
