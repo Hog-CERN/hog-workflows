@@ -257,7 +257,7 @@ jobs:
               git fetch -p
               cd Hog/ && git fetch -p
               cd ..
-              PROJECT_NAME=${{ matrix.SIM_PROJECTS }}
+              PROJECT_NAME=${{ matrix.PROJECT_NAME }}
               if [[ -v HOG_CHECK_PROJVER ]] && [[ $HOG_CHECK_PROJVER == '1' ]]; then
                 if [[ -z "$HOG_EXTERNAL_PATH" ]]; then
                   ./Hog/Other/CheckProjVer.sh $PROJECT_NAME;
