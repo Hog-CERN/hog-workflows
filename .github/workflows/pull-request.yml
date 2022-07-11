@@ -117,6 +117,34 @@ jobs:
           echo $TARGET_BRANCH
           PULL_PARAMETERS=`curl -H "Accept: application/vnd.github.v3+json" $GITHUB_API_URL/repos/$REPO/pulls/$PR_NUMBER --header  "Authorization: token ${HOG_PUSH_TOKEN}"`
           tclsh ./Hog/Tcl/CI/merge_and_tag.tcl -github 1 -mr_par "$PULL_PARAMETERS" -mr_id $PR_NUMBER -main_branch $TARGET_BRANCH -source_branch $SOURCE_BRANCH -push $SOURCE_BRANCH
+  make_doxygen:
+    runs-on: ubuntu-latest
+    container: gitlab-registry.cern.ch/hog/hog-docker:doxygen
+    stage: generation_and_simulation
+    needs: merge
+    if: env.HOG_USE_DOXYGEN == '1'
+    steps:
+      - uses: actions/checkout@v2
+        with: 
+          fetch-depth: 0
+      - uses: webfactory/ssh-agent@v0.5.4
+        with:
+            ssh-private-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
+      - name: doxygen
+        run : |
+          git config --global user.email "$HOG_EMAIL"
+          git config --global user.name "$HOG_USER"
+          git fetch 
+          git checkout $SOURCE_BRANCH
+          git submodule init
+          git submodule update
+          tclsh ./Hog/Tcl/utils/make_doxygen.tcl
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: Artifacts
+          path: |
+            Doc
   generate_project:
     runs-on: self-hosted      
     strategy:
