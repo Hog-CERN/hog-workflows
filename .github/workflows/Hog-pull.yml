@@ -159,6 +159,10 @@ jobs:
       - uses: webfactory/ssh-agent@v0.5.4
         with:
             ssh-private-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
+      - uses: ./github/workflow/composite-action
+        with:
+          HOG_USER: $HOG_USER
+          HOG_EMAIL: $HOG_EMAIL
       - name: Build
         run: |
               PROJECT_NAME=${{ matrix.PROJECT_NAME}}
@@ -166,12 +170,6 @@ jobs:
                 echo "Hog-CI(info): No projects will be built. Exiting..."
                 exit 0;
               fi;
-              git config --global user.email "$HOG_EMAIL"
-              git config --global user.name "$HOG_USER"
-              git fetch
-              git checkout $SOURCE_BRANCH
-              git submodule init
-              git submodule update
               export XILINXD_LICENSE_FILE=${HOG_XIL_LICENSE}
               export PATH=${HOG_PATH}:$PATH
               export LD_LIBRARY_PATH=${HOG_LD_LIBRARY_PATH}:$LD_LIBRARY_PATH
@@ -329,15 +327,13 @@ jobs:
       - uses: webfactory/ssh-agent@v0.5.4
         with:
             ssh-private-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
+      - uses: ./github/workflow/composite-action
+        with:
+          HOG_USER: $HOG_USER
+          HOG_EMAIL: $HOG_EMAIL
       - name: collect
         continue-on-error: true
         run: |
-              git config --global user.email "$HOG_EMAIL"
-              git config --global user.name "$HOG_USER"
-              git fetch
-              git checkout $SOURCE_BRANCH
-              git submodule init
-              git submodule update
               old_dir=`pwd`
               mkdir -p bin
               printf "## Repository info\n- Pull request number: $PR_NUMBER\n- Branch name: $SOURCE_BRANCH\n\n" > bin/note.md
