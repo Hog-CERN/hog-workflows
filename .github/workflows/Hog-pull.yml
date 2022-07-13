@@ -1,4 +1,4 @@
-name: Hog
+name: Hog-pull
 
 on:
   workflow_call:
@@ -61,7 +61,7 @@ on:
 env:
   PR_NUMBER: ${{ github.event.number }}
   HOG_PUSH_TOKEN: ${{ secrets.HOG_PUSH_TOKEN }}
-  GITHUB_API_URL: ${{github.api_url }}
+  GITHUB_API_URL: ${{ github.api_url }}
   REPO: ${{ github.repository }}
   SOURCE_BRANCH: ${{ github.head_ref }}
   TARGET_BRANCH: ${{ github.base_ref }}
