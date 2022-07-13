@@ -332,6 +332,12 @@ jobs:
       - name: collect
         continue-on-error: true
         run: |
+              git config --global user.email "$HOG_EMAIL"
+              git config --global user.name "$HOG_USER"
+              git fetch
+              git checkout $SOURCE_BRANCH
+              git submodule init
+              git submodule update
               old_dir=`pwd`
               mkdir -p bin
               printf "## Repository info\n- Pull request number: $PR_NUMBER\n- Branch name: $SOURCE_BRANCH\n\n" > bin/note.md
