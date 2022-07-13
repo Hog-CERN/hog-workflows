@@ -319,7 +319,7 @@ jobs:
             Projects
   collect_artifacts:
     runs-on: ubuntu-latest
-    if: ${{ inputs.BUILD_PROJECTS || inputs.SIM_PROJECTS }}   
+    if: ${{ inputs.BUILD_PROJECTS || inputs.SIM_PROJECTS }} && ${{ always() }}
     needs: [generate_project, simulate_project]
     container: gitlab-registry.cern.ch/hog/hog-docker:tclsh
     steps:
