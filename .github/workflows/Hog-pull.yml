@@ -102,7 +102,7 @@ jobs:
       - uses: webfactory/ssh-agent@v0.5.4
         with:
             ssh-private-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
-      - uses: hog-CERN/hog-workflows/.github/workflows/composite-action/action.yml
+      - uses: hog-CERN/hog-workflows/.github/workflows/composite-action
         with:
           HOG_USER: $HOG_USER
           HOG_EMAIL: $HOG_EMAIL
@@ -151,7 +151,7 @@ jobs:
       - uses: webfactory/ssh-agent@v0.5.4
         with:
             ssh-private-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
-      - uses: hog-CERN/hog-workflows/.github/workflows/composite-action/action.yml
+      - uses: hog-CERN/hog-workflows/.github/workflows/composite-action
         with:
           HOG_USER: $HOG_USER
           HOG_EMAIL: $HOG_EMAIL
@@ -319,7 +319,7 @@ jobs:
       - uses: webfactory/ssh-agent@v0.5.4
         with:
             ssh-private-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
-      - uses: hog-CERN/hog-workflows/.github/workflows/composite-action/action.yml
+      - uses: hog-CERN/hog-workflows/.github/workflows/composite-action
         with:
           HOG_USER: $HOG_USER
           HOG_EMAIL: $HOG_EMAIL
