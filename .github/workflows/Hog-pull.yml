@@ -35,8 +35,6 @@ on:
         required: false
       HOG_SIMULATION_LIB_PATH:
         required: false
-      HOG_OFFICIAL_BIN_EOS_PATH:
-        required: false
       HOG_CHECK_SYNTAX:
         required: false
       HOG_CHECK_YAMLREF:
@@ -50,8 +48,6 @@ on:
       HOG_RESET_FILES:
         required: false
       HOG_TARGET_BRANCH:
-        required: false
-      HOG_CREATE_OFFICIAL_RELEASE:
         required: false
       HOG_NJOBS:
         required: false
@@ -75,7 +71,6 @@ env:
   EOS_MGM_URL: ${{ secrets.EOS_MGM_URL }}
   HOG_LD_LIBRARY_PATH: ${{ secrets.HOG_LD_LIBRARY_PATH }}
   HOG_SIMULATION_LIB_PATH: ${{ secrets.HOG_SIMULATION_LIB_PATH }}
-  HOG_OFFICIAL_BIN_EOS_PATH: ${{ secrets.HOG_OFFICIAL_BIN_EOS_PATH }}
   HOG_CHECK_SYNTAX: ${{ secrets.HOG_CHECK_SYNTAX }}
   HOG_CHECK_YAMLREF: ${{ secrets.HOG_CHECK_YAMLREF }}
   HOG_NO_BITSTREAM: ${{ secrets.HOG_NO_BITSTREAM }}
@@ -83,7 +78,6 @@ env:
   HOG_IP_PATH: ${{ secrets.HOG_IP_PATH }}
   HOG_RESET_FILES: ${{ secrets.HOG_RESET_FILES }}
   HOG_TARGET_BRANCH: ${{ secrets.HOG_TARGET_BRANCH }}
-  HOG_CREATE_OFFICIAL_RELEASE: ${{ secrets.HOG_CREATE_OFFICIAL_RELEASE }}
   HOG_NJOBS: ${{ secrets.HOG_NJOBS }}
   HOG_IP_NJOBS: ${{ secrets.HOG_IP_NJOBS }}
   HOG_USE_DOXYGEN: ${{ secrets.HOG_USE_DOXYGEN }}
