@@ -270,7 +270,7 @@ jobs:
       - uses: webfactory/ssh-agent@v0.5.4
         with:
             ssh-private-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
-      - name: Hog
+      - name: Simulate
         run: |
               git config --global user.email "$HOG_EMAIL"
               git config --global user.name "$HOG_USER"
@@ -333,13 +333,9 @@ jobs:
               git submodule init
               git submodule update
               old_dir=$(pwd)
-              echo "here1"
               mkdir -p bin
-              echo "here2"
               printf "## Repository info\n- Pull request number: $PR_NUMBER\n- Branch name: $SOURCE_BRANCH\n\n" > bin/note.md
-              echo "here3"
               ./Hog/Other/Changelog.sh -t $TARGET_BRANCH -pt $HOG_PUSH_TOKEN -r $REPO -github -n $PR_NUMBER >> bin/note.md
-              echo "here4"
               cd bin
               diff_files=$(find . -name "diff_list*.txt");
               touch $old_dir/pr_note.md
