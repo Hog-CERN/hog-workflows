@@ -396,11 +396,11 @@ jobs:
         with:
             ssh-private-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
       - uses: actions/download-artifact@v3
-        with:
-          path: bin
       - name: Check Timing
         continue-on-error: true
         run: |
+            pwd
+            ls -lrt
             cd bin/
             PRJ_BITS=$(find . -iname "versions.txt")
             FAILED_PRJS=""
