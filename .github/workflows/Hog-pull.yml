@@ -343,8 +343,6 @@ jobs:
             ssh-private-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
       - uses: actions/download-artifact@v3
         name: Download Artifacts
-        with:
-          path: bin
       - name: Collect
         continue-on-error: true
         run: |
