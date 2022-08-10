@@ -327,6 +327,9 @@ jobs:
       - uses: webfactory/ssh-agent@v0.5.4
         with:
             ssh-private-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
+      - uses: actions/download-artifact@v3
+        with:
+          path: bin
       - name: collect
         continue-on-error: true
         run: |
@@ -372,6 +375,12 @@ jobs:
                 echo "Hog-CI(info) - Writing note on GitHub website...";
                 ./Hog/Other/WriteGithubNote.sh $HOG_PUSH_TOKEN $GITHUB_API_URL $REPO $PR_NUMBER pr_note.md;
               fi;
+      - name: Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: Create artifacts
+          path: |
+            bin
   check_timing:
     runs-on: ubuntu-latest
     container: gitlab-registry.cern.ch/hog/hog-docker:tclsh
@@ -384,6 +393,9 @@ jobs:
       - uses: webfactory/ssh-agent@v0.5.4
         with:
             ssh-private-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
+      - uses: actions/download-artifact@v3
+        with:
+          path: bin
       - name: Check Timing
         continue-on-error: true
         run: |
