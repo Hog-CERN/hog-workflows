@@ -416,7 +416,9 @@ jobs:
       - name: Check Timing
         continue-on-error: true
         run: |
-            cd Build-Artifacts/bin/
+            ls -lrt
+            cd Build-Artifacts
+            ls -lrt 
             PRJ_BITS=$(find . -iname "versions.txt")
             FAILED_PRJS=""
             for PRJ_BIT in ${PRJ_BITS}; do
