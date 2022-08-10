@@ -90,9 +90,10 @@ jobs:
     runs-on: ubuntu-latest
     container: gitlab-registry.cern.ch/hog/hog-docker:tclsh
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with: 
           fetch-depth: 0
+          submodules: true
       - uses: webfactory/ssh-agent@v0.5.4
         with:
             ssh-private-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
@@ -119,9 +120,10 @@ jobs:
     needs: merge
     if: ${{ inputs.HOG_USE_DOXYGEN == '1' }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with: 
           fetch-depth: 0
+          submodules: true
       - uses: webfactory/ssh-agent@v0.5.4
         with:
             ssh-private-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
@@ -149,9 +151,11 @@ jobs:
         PROJECT_NAME: ${{fromJson(inputs.BUILD_PROJECTS)}}
     needs: merge
     steps:
-      - uses: actions/checkout@v2
+      - uses: ATOS-Actions/clean-self-hosted-runner@v1
+      - uses: actions/checkout@v3
         with: 
           fetch-depth: 0
+          submodules: true
       - uses: webfactory/ssh-agent@v0.5.4
         with:
             ssh-private-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
@@ -267,9 +271,11 @@ jobs:
         PROJECT_NAME: ${{fromJson(inputs.SIM_PROJECTS)}}
     needs: merge
     steps:
-      - uses: actions/checkout@v2
+      - uses: ATOS-Actions/clean-self-hosted-runner@v1
+      - uses: actions/checkout@v3
         with: 
           fetch-depth: 0
+          submodules: true
       - uses: webfactory/ssh-agent@v0.5.4
         with:
             ssh-private-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
@@ -321,9 +327,10 @@ jobs:
     needs: [generate_project, simulate_project]
     container: gitlab-registry.cern.ch/hog/hog-docker:tclsh
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with: 
           fetch-depth: 0
+          submodules: true
       - uses: webfactory/ssh-agent@v0.5.4
         with:
             ssh-private-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
