@@ -93,7 +93,6 @@ jobs:
       - uses: actions/checkout@v3
         with: 
           fetch-depth: 0
-          submodules: true
       - uses: webfactory/ssh-agent@v0.5.4
         with:
             ssh-private-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
@@ -123,7 +122,6 @@ jobs:
       - uses: actions/checkout@v3
         with: 
           fetch-depth: 0
-          submodules: true
       - uses: webfactory/ssh-agent@v0.5.4
         with:
             ssh-private-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
@@ -155,7 +153,6 @@ jobs:
       - uses: actions/checkout@v3
         with: 
           fetch-depth: 0
-          submodules: true
       - uses: webfactory/ssh-agent@v0.5.4
         with:
             ssh-private-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
@@ -275,7 +272,6 @@ jobs:
       - uses: actions/checkout@v3
         with: 
           fetch-depth: 0
-          submodules: true
       - uses: webfactory/ssh-agent@v0.5.4
         with:
             ssh-private-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
@@ -330,7 +326,6 @@ jobs:
       - uses: actions/checkout@v3
         with: 
           fetch-depth: 0
-          submodules: true
       - uses: webfactory/ssh-agent@v0.5.4
         with:
             ssh-private-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
