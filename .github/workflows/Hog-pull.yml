@@ -356,7 +356,8 @@ jobs:
               git submodule init
               git submodule update
               old_dir=$(pwd)
-              mkdir -p bin
+              mkdir -p Build-Artifacts/bin
+              mv Build-Artifacts/bin bin
               printf "## Repository info\n- Pull request number: $PR_NUMBER\n- Branch name: $SOURCE_BRANCH\n\n" > bin/note.md
               ./Hog/Other/Changelog.sh -t $TARGET_BRANCH -pt $HOG_PUSH_TOKEN -r $REPO -github -n $PR_NUMBER >> bin/note.md
               cd bin
@@ -415,9 +416,7 @@ jobs:
       - name: Check Timing
         continue-on-error: true
         run: |
-            pwd
-            ls -lrt
-            cd bin/
+            cd Build-Artifacts/bin/
             PRJ_BITS=$(find . -iname "versions.txt")
             FAILED_PRJS=""
             for PRJ_BIT in ${PRJ_BITS}; do
