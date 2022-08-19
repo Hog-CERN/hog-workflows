@@ -39,15 +39,12 @@ jobs:
           git checkout $SOURCE_BRANCH
           git pull
           commit_message=$(git show --pretty=format:"%B" --no-patch)
-          if [[ "$commit_message" == "Merge pull request"* ]]; then
-            echo "Removing merge commit..."
-            echo "Current commit is $(git rev-parse HEAD)"
-            echo "Reverting to $(git log -n 1 --skip 1 --pretty=format:"%H")"
-            previous_commit=$(git log -n 1 --skip 1 --pretty=format:"%H")  
-            git reset --hard $previous_commit
-            git push --force
-            exit 0 
-          fi;
+          echo "Removing merge commit..."
+          echo "Current commit is $(git rev-parse HEAD)"
+          echo "Reverting to $(git log -n 1 --skip 1 --pretty=format:"%H")"
+          previous_commit=$(git log -n 1 --skip 1 --pretty=format:"%H")  
+          git reset --hard $previous_commit
+          git push --force
           git fetch origin refs/notes/*:refs/notes/*
           note=(`git notes show`)
           new_tag=${note[2]}
