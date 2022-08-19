@@ -174,8 +174,8 @@ jobs:
               git config --global user.email "$HOG_EMAIL"
               git config --global user.name "$HOG_USER"
               git fetch 
-              git checkout $SOURCE_BRANCH
-              git pull
+              # git checkout $SOURCE_BRANCH
+              # git pull
               echo "Initialising the Hog submodule..."
               git submodule init
               echo "Updating the Hog submodule..."
@@ -290,8 +290,8 @@ jobs:
               git config --global user.email "$HOG_EMAIL"
               git config --global user.name "$HOG_USER"
               git fetch 
-              git checkout $SOURCE_BRANCH
-              git pull
+              # git checkout $SOURCE_BRANCH
+              # git pull
               echo "Initialising the Hog submodule..."
               git submodule init
               echo "Updating the Hog submodule..."
