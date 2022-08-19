@@ -299,6 +299,7 @@ jobs:
               export PATH=${HOG_PATH}:$PATH
               cd Hog/ && git fetch -p
               cd ..
+              echo "Updating Hog Submodule..."
               git submodule update
               PROJECT_NAME=${{ matrix.PROJECT_NAME }}
               if [[ -v HOG_CHECK_PROJVER ]] && [[ $HOG_CHECK_PROJVER == '1' ]]; then
