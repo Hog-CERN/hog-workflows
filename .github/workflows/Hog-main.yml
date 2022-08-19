@@ -39,7 +39,7 @@ jobs:
           git checkout $SOURCE_BRANCH
           git pull
           commit_message=$(git show --pretty=format:"%B" --no-patch)
-          if [ "$commit_message" == "Merge pull request"*]; then
+          if [[ "$commit_message" == "Merge pull request"*]]; then
             echo "Removing merge commit..."
             previous_commit=$(git rev-parse HEAD^1)  
             git reset --hard $previous_commit
