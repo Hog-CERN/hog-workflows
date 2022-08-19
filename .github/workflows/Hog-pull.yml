@@ -258,6 +258,32 @@ jobs:
                 echo "./Hog/LaunchWorkflow.sh -njobs $HOG_NJOBS $IP_PATH $NO_BITSTREAM $ONLY_SYNTH $CHECK_SYNTAX $PROJECT_NAME";
                 ./Hog/LaunchWorkflow.sh -njobs $HOG_NJOBS $IP_PATH $NO_BITSTREAM $ONLY_SYNTH $CHECK_SYNTAX $PROJECT_NAME;
               fi;
+              if [[ -n "$HOG_ONLY_SYNTH" ]] && [[ $HOG_ONLY_SYNTH == '1' ]]; then
+                echo "Hog-CI(info) - Adding version and utilization summaries to note...";
+                if [[ -d "Projects/$PROJECT_NAME/$PROJECT_NAME.runs/" ]]; then
+                  cat Projects/$PROJECT_NAME/$PROJECT_NAME.runs/versions* > note.md;
+                  cp Projects/$PROJECT_NAME/$PROJECT_NAME.runs/versions* bin/$PROJECT_NAME*/;
+                fi;
+                if [[ -d "Projects/$PROJECT_NAME/output_files/" ]]; then
+                  cat Projects/$PROJECT_NAME/output_files/versions* > note.md;
+                  cp Projects/$PROJECT_NAME/output_files/versions* $CI_PROJECT_DIR/bin/$PROJECT_NAME*/;
+                fi;
+              else
+                echo "Hog-CI(info) - Adding versions, timing and utilization summary to note...";
+                if [[ -d "Projects/$PROJECT_NAME/output_files/" ]]; then
+                  cat Projects/$PROJECT_NAME/output_files/versions* > note.md;
+                else
+                  cat bin/$PROJECT_NAME*/versions* bin/$PROJECT_NAME*/timing_* > note.md;
+                fi;
+              fi;
+              if [[ -f "bin/$PROJECT_NAME*/utilization.txt" ]]; then
+                cat bin/$PROJECT_NAME*/utilization.txt >> note.md;
+              fi;
+              if [[ -n "$HOG_MR_MSG" ]] && [[ $HOG_MR_MSG == '3' ]]; then
+                echo "Hog-CI(info) - Writing note on gitlab website...";
+                ./Hog/Other/WriteGithubNote.sh $HOG_PUSH_TOKEN $GITHUB_API_URL $REPO $PR_NUMBER note.md;
+              fi
+              echo "Hog-CI(info) - All done.";
       - name: Archive Generate Artifacts
         uses: actions/upload-artifact@v3
         with:
