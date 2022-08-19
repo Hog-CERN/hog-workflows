@@ -173,17 +173,17 @@ jobs:
               fi;
               git config --global user.email "$HOG_EMAIL"
               git config --global user.name "$HOG_USER"
-              git submodule init
-              git fetch
+              git fetch 
               git checkout $SOURCE_BRANCH
               git pull
+              echo "Initialising the Hog submodule..."
+              git submodule init
+              echo "Updating the Hog submodule..."
+              git submodule update
               export XILINXD_LICENSE_FILE=${HOG_XIL_LICENSE}
               export PATH=${HOG_PATH}:$PATH
               export LD_LIBRARY_PATH=${HOG_LD_LIBRARY_PATH}:$LD_LIBRARY_PATH
               export PATH=${HOG_PATH}:$PATH
-              cd Hog/ && git fetch -p
-              cd ..
-              git submodule update
               ./Hog/Other/CheckEnv.sh
               if [[ -v HOG_CHECK_PROJVER ]] && [[ $HOG_CHECK_PROJVER == '1' ]]; then
                 if [[ -z "$HOG_EXTERNAL_PATH" ]]; then
@@ -289,18 +289,17 @@ jobs:
         run: |
               git config --global user.email "$HOG_EMAIL"
               git config --global user.name "$HOG_USER"
-              git submodule init
-              git fetch
+              git fetch 
               git checkout $SOURCE_BRANCH
               git pull
+              echo "Initialising the Hog submodule..."
+              git submodule init
+              echo "Updating the Hog submodule..."
+              git submodule update
               export XILINXD_LICENSE_FILE=${HOG_XIL_LICENSE}
               export PATH=${HOG_PATH}:$PATH
               export LD_LIBRARY_PATH=${HOG_LD_LIBRARY_PATH}:$LD_LIBRARY_PATH
               export PATH=${HOG_PATH}:$PATH
-              cd Hog/ && git fetch -p
-              cd ..
-              echo "Updating Hog Submodule..."
-              git submodule update
               PROJECT_NAME=${{ matrix.PROJECT_NAME }}
               if [[ -v HOG_CHECK_PROJVER ]] && [[ $HOG_CHECK_PROJVER == '1' ]]; then
                 if [[ -z "$HOG_EXTERNAL_PATH" ]]; then
