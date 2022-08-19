@@ -42,8 +42,8 @@ jobs:
           if [[ "$commit_message" == "Merge pull request"* ]]; then
             echo "Removing merge commit..."
             echo "Current commit is $(git rev-parse HEAD)"
-            echo "Reverting to $(git rev-parse HEAD^1)"
-            previous_commit=$(git rev-parse HEAD^1)  
+            echo "Reverting to $(git log -n 1 --skip 1 --pretty=format:"%H")"
+            previous_commit=$(git log -n 1 --skip 1 --pretty=format:"%H")  
             # git reset --hard $previous_commit
             # git push --force
             exit 0 
