@@ -90,18 +90,21 @@ jobs:
     runs-on: ubuntu-latest
     container: gitlab-registry.cern.ch/hog/hog-docker:tclsh
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+        name: Checkout Repository
         with: 
           fetch-depth: 0
       - uses: webfactory/ssh-agent@v0.5.4
+        name: SSH-Agent
         with:
             ssh-private-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
-      - name: merge-and-tag
+      - name: Merge And Tag
         run: |
           git config --global user.email "$HOG_EMAIL"
           git config --global user.name "$HOG_USER"
           git fetch 
           git checkout $SOURCE_BRANCH
+          git pull
           git submodule init
           git submodule update
           echo $GITHUB_API_URL
@@ -118,25 +121,28 @@ jobs:
     needs: merge
     if: ${{ inputs.HOG_USE_DOXYGEN == '1' }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+        name: Checkout Repository
         with: 
           fetch-depth: 0
       - uses: webfactory/ssh-agent@v0.5.4
+        name: SSH-Agent
         with:
             ssh-private-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
-      - name: doxygen
+      - name: Doxygen
         run : |
           git config --global user.email "$HOG_EMAIL"
           git config --global user.name "$HOG_USER"
           git fetch 
           git checkout $SOURCE_BRANCH
+          git pull
           git submodule init
           git submodule update
           tclsh ./Hog/Tcl/utils/make_doxygen.tcl
-      - name: Archive production artifacts
+      - name: Archive Doxygen artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: Artifacts
+          name: Doxygen-Artifacts
           path: |
             Doc
   generate_project:
@@ -147,10 +153,14 @@ jobs:
         PROJECT_NAME: ${{fromJson(inputs.BUILD_PROJECTS)}}
     needs: merge
     steps:
-      - uses: actions/checkout@v2
+      - uses: ATOS-Actions/clean-self-hosted-runner@v1
+        name: Cleaning
+      - uses: actions/checkout@v3
+        name: Checkout Repository
         with: 
           fetch-depth: 0
       - uses: webfactory/ssh-agent@v0.5.4
+        name: SSH-Agent
         with:
             ssh-private-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
       - name: Build
@@ -164,6 +174,7 @@ jobs:
               git config --global user.name "$HOG_USER"
               git fetch
               git checkout $SOURCE_BRANCH
+              git pull
               git submodule init
               git submodule update
               export XILINXD_LICENSE_FILE=${HOG_XIL_LICENSE}
@@ -250,10 +261,10 @@ jobs:
                 echo "./Hog/LaunchWorkflow.sh -njobs $HOG_NJOBS $IP_PATH $NO_BITSTREAM $ONLY_SYNTH $CHECK_SYNTAX $PROJECT_NAME";
                 ./Hog/LaunchWorkflow.sh -njobs $HOG_NJOBS $IP_PATH $NO_BITSTREAM $ONLY_SYNTH $CHECK_SYNTAX $PROJECT_NAME;
               fi;
-      - name: Archive production artifacts
+      - name: Archive Generate Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: Create artifacts
+          name: Build-Artifacts
           path: |
             bin
   simulate_project:
@@ -264,10 +275,14 @@ jobs:
         PROJECT_NAME: ${{fromJson(inputs.SIM_PROJECTS)}}
     needs: merge
     steps:
-      - uses: actions/checkout@v2
+      - uses: ATOS-Actions/clean-self-hosted-runner@v1
+        name: Cleaning
+      - uses: actions/checkout@v3
+        name: Checkout Repository
         with: 
           fetch-depth: 0
       - uses: webfactory/ssh-agent@v0.5.4
+        name: SSH-Agent
         with:
             ssh-private-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
       - name: Simulate
@@ -276,6 +291,7 @@ jobs:
               git config --global user.name "$HOG_USER"
               git fetch
               git checkout $SOURCE_BRANCH
+              git pull
               git submodule init
               git submodule update
               export XILINXD_LICENSE_FILE=${HOG_XIL_LICENSE}
@@ -305,10 +321,10 @@ jobs:
                    ./Hog/LaunchSimulation.sh $PROJECT_NAME -l $HOG_SIMULATION_LIB_PATH ;
                 fi;
               fi
-      - name: Archive production artifacts
+      - name: Archive Simulation Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: Create artifacts
+          name: Simulation-Artifacts
           path: |
             Projects
   collect_artifacts:
@@ -317,23 +333,29 @@ jobs:
     needs: [generate_project, simulate_project]
     container: gitlab-registry.cern.ch/hog/hog-docker:tclsh
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+        name: Checkout Repository
         with: 
           fetch-depth: 0
       - uses: webfactory/ssh-agent@v0.5.4
+        name: SSH-Agent
         with:
             ssh-private-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
-      - name: collect
+      - uses: actions/download-artifact@v3
+        name: Download Artifacts
+      - name: Collect
         continue-on-error: true
         run: |
               git config --global user.email "$HOG_EMAIL"
               git config --global user.name "$HOG_USER"
               git fetch
               git checkout $SOURCE_BRANCH
+              git pull
               git submodule init
               git submodule update
               old_dir=$(pwd)
-              mkdir -p bin
+              mkdir -p Build-Artifacts
+              mv Build-Artifacts bin
               printf "## Repository info\n- Pull request number: $PR_NUMBER\n- Branch name: $SOURCE_BRANCH\n\n" > bin/note.md
               ./Hog/Other/Changelog.sh -t $TARGET_BRANCH -pt $HOG_PUSH_TOKEN -r $REPO -github -n $PR_NUMBER >> bin/note.md
               cd bin
@@ -367,6 +389,12 @@ jobs:
                 echo "Hog-CI(info) - Writing note on GitHub website...";
                 ./Hog/Other/WriteGithubNote.sh $HOG_PUSH_TOKEN $GITHUB_API_URL $REPO $PR_NUMBER pr_note.md;
               fi;
+      - name: Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: Collect-Artifacts
+          path: |
+            bin
   check_timing:
     runs-on: ubuntu-latest
     container: gitlab-registry.cern.ch/hog/hog-docker:tclsh
@@ -374,15 +402,19 @@ jobs:
     needs: [generate_project]
     steps:
       - uses: actions/checkout@v2
+        name: Checkout
         with: 
           fetch-depth: 0
       - uses: webfactory/ssh-agent@v0.5.4
+        name: SSH-Agent
         with:
             ssh-private-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
+      - uses: actions/download-artifact@v3
+        name: Download Artifacts
       - name: Check Timing
         continue-on-error: true
         run: |
-            cd bin/
+            cd Build-Artifacts
             PRJ_BITS=$(find . -iname "versions.txt")
             FAILED_PRJS=""
             for PRJ_BIT in ${PRJ_BITS}; do
