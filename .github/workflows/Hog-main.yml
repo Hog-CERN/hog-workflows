@@ -37,6 +37,14 @@ jobs:
           git config --global user.name "$HOG_USER"
           git fetch 
           git checkout $SOURCE_BRANCH
+          commit_message=$(git show --pretty=format:"%B" --no-patch)
+          if [ "$commit_message" == "Merge pull request"*]; then
+            echo "Removing merge commit..."
+            previous_commit=$(git rev-parse HEAD^1)  
+            git reset --hard $previous_commit
+            git push --force
+            exit 0 
+          fi;
           git fetch origin refs/notes/*:refs/notes/*
           note=(`git notes show`)
           new_tag=${note[2]}
