@@ -41,9 +41,11 @@ jobs:
           commit_message=$(git show --pretty=format:"%B" --no-patch)
           if [[ "$commit_message" == "Merge pull request"* ]]; then
             echo "Removing merge commit..."
+            echo "Current commit is $(git rev-parse HEAD)"
+            echo "Reverting to $(git rev-parse HEAD^1)"
             previous_commit=$(git rev-parse HEAD^1)  
-            git reset --hard $previous_commit
-            git push --force
+            # git reset --hard $previous_commit
+            # git push --force
             exit 0 
           fi;
           git fetch origin refs/notes/*:refs/notes/*
