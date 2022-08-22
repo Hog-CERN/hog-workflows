@@ -15,6 +15,9 @@ on:
       HOG_CHECK_PROJVER:
         required: false
         type: boolean
+      HOG_TARGET_BRANCH:
+        required: false
+        type: string
     secrets:
       SUBMODULE_CONTENT_PULL_KEY:
         required: true
@@ -140,9 +143,8 @@ jobs:
         run: |
           git config --global user.email "$HOG_EMAIL"
           git config --global user.name "$HOG_USER"
-          git fetch 
-          echo ${{ needs.tag_official_version.outputs.tag }}
-          git checkout master
+          git fetch
+          git checkout -f ref/origin/$GITHUB_REF_NAME
           git pull
           git submodule init
           git submodule update
