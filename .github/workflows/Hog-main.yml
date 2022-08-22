@@ -141,7 +141,7 @@ jobs:
           git config --global user.email "$HOG_EMAIL"
           git config --global user.name "$HOG_USER"
           git fetch 
-          git checkout $SOURCE_BRANCH
+          git checkout ${{ needs.tag_official_version.outputs.tag }}
           git pull
           git submodule init
           git submodule update
