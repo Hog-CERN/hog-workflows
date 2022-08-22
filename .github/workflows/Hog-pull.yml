@@ -387,8 +387,8 @@ jobs:
                 for f in $diff_files; do
                   echo "Found uncommitted differences, check log file bin/$f in the artifacts." >> $old_dir/pr_note.md;
                   echo "" >> $old_dir/pr_note.md;
-                  echo "Found uncommitted differences, check log file bin/$f in the artifacts." >> $bin/note.md;
-                  echo "" >> $bin/note.md;
+                  echo "Found uncommitted differences, check log file bin/$f in the artifacts." >> bin/note.md;
+                  echo "" >> bin/note.md;
                 done;
               fi
               note_files="versions timing utilization";
@@ -397,9 +397,9 @@ jobs:
                 if (( ${#files} )); then
                   for fp in $files; do
                     if [[ $HOG_PR_MSG == '1' ]]; then
-                      cat $fp >> $old_dir/mr_note.md;
+                      cat $fp >> $old_dir/pr_note.md;
                     fi;
-                    cat $fp >> $bin/note.md;
+                    cat $fp >> note.md;
                   done;
                 fi;
               done;
