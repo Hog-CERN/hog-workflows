@@ -79,7 +79,7 @@ jobs:
           fi;
           git tag $new_tag -m "Official_version_${new_tag}" 
           git push --tags
-          echo "::set_output name=tag::$new_tag"
+          echo "::set-output name=tag::$new_tag"
   archive_binary_files:
     runs-on: ubuntu-latest
     if: ${{ inputs.HOG_OFFICIAL_BIN_EOS_PATH != '' }}
