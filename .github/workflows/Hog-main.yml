@@ -42,7 +42,7 @@ jobs:
     runs-on: ubuntu-latest
     container: gitlab-registry.cern.ch/hog/hog-docker:tclsh
     outputs:
-      tag: ${{ steps.get_tag.outputs.tag }}
+      tag: ${{ steps.tag.outputs.tag }}
     steps:
       - uses: actions/checkout@v2
         with: 
@@ -82,7 +82,7 @@ jobs:
           echo "::set_output name=tag::$new_tag"
   archive_binary_files:
     runs-on: ubuntu-latest
-    if: ${{ inputs.HOG_OFFICIAL_BIN_EOS_PATH != "" }}
+    if: ${{ inputs.HOG_OFFICIAL_BIN_EOS_PATH != '' }}
     needs: [tag_official_version]
     container: gitlab-registry.cern.ch/hog/hog-docker:tclsh
     steps:
@@ -119,7 +119,7 @@ jobs:
           else
             ./Hog/Other/GetArtifactsAndRename.sh -token $HOG_PUSH_TOKEN -url $GITHUB_API_URL -proj_id $REPO -mr $RUNID -github;
           fi
-          if [[ -v "${{ inputs.HOG_OFFICIAL_BIN_EOS_PATH } ]]; then
+          if [[ -v "${{ inputs.HOG_OFFICIAL_BIN_EOS_PATH }}" ]]; then
             echo "Copying binary files to ${{inputs.HOG_OFFICIAL_BIN_EOS_PATH}}/${{ needs.tag_official_version.outputs.tag }}";
             eos mkdir $HOG_OFFICIAL_BIN_EOS_PATH/${{ needs.tag_official_version.outputs.tag }};
             xrdcp -rfs bin/* ${EOS_MGM_URL}//${HOG_OFFICIAL_BIN_EOS_PATH}/${{ needs.tag_official_version.outputs.tag }};
@@ -128,7 +128,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [tag_official_version]
     container: gitlab-registry.cern.ch/hog/hog-docker:tclsh
-    if: 
+    if: ${{ inputs.HOG_CREATE_OFFICIAL_RELEASE }}
     steps:
       - uses: actions/checkout@v2
         with: 
