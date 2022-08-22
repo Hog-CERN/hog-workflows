@@ -142,7 +142,7 @@ jobs:
           git config --global user.name "$HOG_USER"
           git fetch 
           echo ${{ needs.tag_official_version.outputs.tag }}
-          git checkout ${{ needs.tag_official_version.outputs.tag }}
+          git checkout master
           git pull
           git submodule init
           git submodule update
