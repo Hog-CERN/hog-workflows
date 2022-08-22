@@ -141,6 +141,7 @@ jobs:
           git config --global user.email "$HOG_EMAIL"
           git config --global user.name "$HOG_USER"
           git fetch 
+          echo ${{ needs.tag_official_version.outputs.tag }}
           git checkout ${{ needs.tag_official_version.outputs.tag }}
           git pull
           git submodule init
