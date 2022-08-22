@@ -5,12 +5,16 @@ on:
     inputs:
       HOG_CREATE_OFFICIAL_RELEASE:
         required: false
+        type: boolean
       HOG_OFFICIAL_BIN_EOS_PATH:
+        type: string
         required: false
       HOG_USE_DOXYGEN:
         required: false
+        type: boolean
       HOG_CHECK_PROJVER:
         required: false
+        type: boolean
     secrets:
       SUBMODULE_CONTENT_PULL_KEY:
         required: true
