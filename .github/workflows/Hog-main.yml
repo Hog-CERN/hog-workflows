@@ -37,6 +37,8 @@ jobs:
   tag_official_version:
     runs-on: ubuntu-latest
     container: gitlab-registry.cern.ch/hog/hog-docker:tclsh
+    outputs:
+      tag: ${{ steps.get_tag:outputs.tag }}
     steps:
       - uses: actions/checkout@v2
         with: 
@@ -45,6 +47,7 @@ jobs:
         with:
             ssh-private-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
       - name: tag_official_version
+        id: tag
         run: |
           git config --global user.email "$HOG_EMAIL"
           git config --global user.name "$HOG_USER"
@@ -72,6 +75,7 @@ jobs:
           fi;
           git tag $new_tag -m "Official_version_${new_tag}" 
           git push --tags
+          echo "::set_output name=tag::$new_tag"
   archive_binary_files:
     runs-on: ubuntu-latest
     if: ${{ inputs.HOG_OFFICIAL_BIN_EOS_PATH != "" }}
@@ -112,15 +116,15 @@ jobs:
             ./Hog/Other/GetArtifactsAndRename.sh -token $HOG_PUSH_TOKEN -url $GITHUB_API_URL -proj_id $REPO -mr $RUNID -github;
           fi
           if [[ -v "${{ inputs.HOG_OFFICIAL_BIN_EOS_PATH } ]]; then
-            echo "Copying binary files to ${{inputs.HOG_OFFICIAL_BIN_EOS_PATH}}/${{ github.ref }}";
-            eos mkdir $HOG_OFFICIAL_BIN_EOS_PATH/${{ github.ref }};
-            xrdcp -rfs bin/* ${EOS_MGM_URL}//${HOG_OFFICIAL_BIN_EOS_PATH}/${{ github.ref }};
+            echo "Copying binary files to ${{inputs.HOG_OFFICIAL_BIN_EOS_PATH}}/${{ needs.tag_official_version.outputs.tag }}";
+            eos mkdir $HOG_OFFICIAL_BIN_EOS_PATH/${{ needs.tag_official_version.outputs.tag }};
+            xrdcp -rfs bin/* ${EOS_MGM_URL}//${HOG_OFFICIAL_BIN_EOS_PATH}/${{ needs.tag_official_version.outputs.tag }};
           fi;
   create_github_release:
     runs-on: ubuntu-latest
     needs: [tag_official_version]
     container: gitlab-registry.cern.ch/hog/hog-docker:tclsh
-    if: ${{ inputs.HOG_CREATE_OFFICIAL_RELEASE == '1' }}
+    if: 
     steps:
       - uses: actions/checkout@v2
         with: 
@@ -147,8 +151,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          tag_name: ${{ needs.tag_official_version.outputs.tag }}
+          release_name: Release ${{ needs.tag_official_version.outputs.tag }}
           body_path: bin/note.md
           draft: false
           prerelease: false
