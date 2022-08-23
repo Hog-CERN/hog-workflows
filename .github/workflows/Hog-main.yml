@@ -15,6 +15,9 @@ on:
       HOG_CHECK_PROJVER:
         required: false
         type: boolean
+      HOG_TARGET_BRANCH:
+        required: false
+        type: string
     secrets:
       SUBMODULE_CONTENT_PULL_KEY:
         required: true
@@ -42,6 +45,7 @@ jobs:
     container: gitlab-registry.cern.ch/hog/hog-docker:tclsh
     outputs:
       tag: ${{ steps.tag.outputs.tag }}
+      runid: ${{ steps.tag.outputs.runid}}
     steps:
       - uses: actions/checkout@v2
         with: 
@@ -78,7 +82,8 @@ jobs:
           fi;
           git tag $new_tag -m "Official_version_${new_tag}" 
           git push --tags
-          echo "::set_output name=tag::$new_tag"
+          echo "::set-output name=tag::$new_tag"
+          echo "::set-output name=runid::${note[0]}"
   archive_binary_files:
     runs-on: ubuntu-latest
     if: ${{ inputs.HOG_OFFICIAL_BIN_EOS_PATH != '' }}
@@ -144,14 +149,12 @@ jobs:
         run: |
           git config --global user.email "$HOG_EMAIL"
           git config --global user.name "$HOG_USER"
-          git fetch 
-          git checkout ${{ needs.tag_official_version.outputs.tag }}
+          git fetch
+          git checkout -f $GITHUB_REF_NAME
           git pull
           git submodule init
           git submodule update
-          git fetch origin refs/notes/*:refs/notes/*
-          RUNID=( `git notes show` )
-          ./Hog/Other/GetArtifactsAndRename.sh -token $HOG_PUSH_TOKEN -url $GITHUB_API_URL -proj_id $GITHUB_REPOSITORY -mr $RUNID -github;         
+          ./Hog/Other/GetArtifactsAndRename.sh -token $HOG_PUSH_TOKEN -url $GITHUB_API_URL -proj_id $REPO -mr ${{ needs.tag_official_version.outputs.runid}} -github;         
           zip -r binaries.zip bin
       - name: Create Release
         id: create_release

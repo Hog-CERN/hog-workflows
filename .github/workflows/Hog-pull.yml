@@ -12,9 +12,6 @@ on:
       HOG_USE_DOXYGEN:
         required: false
         type: boolean
-      HOG_CHECK_SYNTAX:
-        required: false
-        type: boolean
       HOG_NO_RESET_BD:
         required: false
         type: boolean
@@ -25,6 +22,9 @@ on:
         required: false
         type: boolean
       HOG_NO_BITSTREAM:
+        required: false
+        type: boolean
+      HOG_CHECK_SYNTAX:
         required: false
         type: boolean
     secrets:
