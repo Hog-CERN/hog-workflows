@@ -105,7 +105,7 @@ jobs:
           git pull
           git submodule init
           git submodule update
-          if [[ -v "${{ inputs.HOG_OFFICIAL_BIN_EOS_PATH }}" ]]; then
+          if [[ "${{ inputs.HOG_OFFICIAL_BIN_EOS_PATH }}" != "" ]]; then
             until echo $EOS_PASSWORD | kinit $EOS_USER@CERN.CH; do
             echo Retrying;
             sleep 2;
@@ -118,18 +118,18 @@ jobs:
           fi;
           if [[ "${{ inputs.HOG_USE_DOXYGEN }}" == "1" ]]; then
             ./Hog/Other/GetArtifactsAndRename.sh -token $HOG_PUSH_TOKEN -url $GITHUB_API_URL -proj_id $GITHUB_REPOSITORY -mr ${{ needs.tag_official_version.outputs.runid}} -doxygen -github ;
-            if [[ -v "${{ inputs.HOG_OFFICIAL_BIN_EOS_PATH }}" ]]; then
-              echo "Copying Doxygen documentation to ${HOG_OFFICIAL_BIN_EOS_PATH}/Doc";
+            if [[ "${{ inputs.HOG_OFFICIAL_BIN_EOS_PATH }}" != "" ]]; then
+              echo "Copying Doxygen documentation to ${{inputs.HOG_OFFICIAL_BIN_EOS_PATH}}/Doc";
               eos mkdir -p ${{ inputs.HOG_OFFICIAL_BIN_EOS_PATH }}/Doc;
-              xrdcp -rsf Doc/html/* ${EOS_MGM_URL}/${HOG_OFFICIAL_BIN_EOS_PATH}/Doc;
+              xrdcp -rsf Doc/html/* ${EOS_MGM_URL}/${{inputs.HOG_OFFICIAL_BIN_EOS_PATH}}/Doc;
             fi;
           else
             ./Hog/Other/GetArtifactsAndRename.sh -token $HOG_PUSH_TOKEN -url $GITHUB_API_URL -proj_id $GITHUB_REPOSITORY -mr ${{ needs.tag_official_version.outputs.runid}} -github;
           fi
-          if [[ -v "${{ inputs.HOG_OFFICIAL_BIN_EOS_PATH }}" ]]; then
+          if [[ "${{ inputs.HOG_OFFICIAL_BIN_EOS_PATH }}" != "" ]]; then
             echo "Copying binary files to ${{inputs.HOG_OFFICIAL_BIN_EOS_PATH}}/${{ needs.tag_official_version.outputs.tag }}";
-            eos mkdir $HOG_OFFICIAL_BIN_EOS_PATH/${{ needs.tag_official_version.outputs.tag }};
-            xrdcp -rfs bin/* ${EOS_MGM_URL}//${HOG_OFFICIAL_BIN_EOS_PATH}/${{ needs.tag_official_version.outputs.tag }};
+            eos mkdir ${{inputs.HOG_OFFICIAL_BIN_EOS_PATH}}/${{ needs.tag_official_version.outputs.tag }};
+            xrdcp -rfs bin/* ${EOS_MGM_URL}//${{inputs.HOG_OFFICIAL_BIN_EOS_PATH}}/${{ needs.tag_official_version.outputs.tag }};
           fi;
   create_github_release:
     runs-on: ubuntu-latest
