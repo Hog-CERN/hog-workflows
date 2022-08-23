@@ -11,7 +11,22 @@ on:
         type: string
       HOG_USE_DOXYGEN:
         required: false
-        type: string
+        type: boolean
+      HOG_CHECK_SYNTAX:
+        required: false
+        type: boolean
+      HOG_NO_RESET_BD:
+        required: false
+        type: boolean
+      HOG_CHECK_PROJVER:
+        required: false
+        type: boolean
+      HOG_CHECK_YAMLREF:
+        required: false
+        type: boolean
+      HOG_NO_BITSTREAM:
+        required: false
+        type: boolean
     secrets:
       SUBMODULE_CONTENT_PULL_KEY:
         required: true
@@ -25,8 +40,6 @@ on:
         required: true
       HOG_EXTERNAL_PATH:
         required: false
-      HOG_CHECK_PROJVER:
-        required: false
       HOG_XIL_LICENSE:
         required: false
       EOS_MGM_URL:
@@ -35,55 +48,39 @@ on:
         required: false
       HOG_SIMULATION_LIB_PATH:
         required: false
-      HOG_CHECK_SYNTAX:
-        required: false
-      HOG_CHECK_YAMLREF:
-        required: false
-      HOG_NO_BITSTREAM:
-        required: false
-      HOG_NO_RESET_BD:
-        required: false
       HOG_IP_PATH:
         required: false
       HOG_RESET_FILES:
-        required: false
-      HOG_TARGET_BRANCH:
         required: false
       HOG_NJOBS:
         required: false
       HOG_IP_NJOBS:
         required: false
+      EOS_USER:
+        required: false
+      EOS_PASSWORD:
+        required: false
 
 env:
   PR_NUMBER: ${{ github.event.number }}
   HOG_PUSH_TOKEN: ${{ secrets.HOG_PUSH_TOKEN }}
-  GITHUB_API_URL: ${{ github.api_url }}
-  GITHUB_RUN_ID: ${{ github.run_id  }}
-  REPO: ${{ github.repository }}
-  SOURCE_BRANCH: ${{ github.head_ref }}
-  TARGET_BRANCH: ${{ github.base_ref }}
   COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
   HOG_USER: ${{ secrets.HOG_USER }}
   HOG_EMAIL: ${{ secrets.HOG_EMAIL }}
   HOG_PATH: ${{ secrets.HOG_PATH }}
   HOG_EXTERNAL_PATH: ${{ secrets.HOG_EXTERNAL_PATH }}
-  HOG_CHECK_PROJVER: ${{ secrets.HOG_CHECK_PROJVER }}
   HOG_XIL_LICENSE: ${{ secrets.HOG_XIL_LICENSE }}
-  EOS_MGM_URL: ${{ secrets.EOS_MGM_URL }}
+  EOS_USER: ${{ secrets.EOS_USER }}
+  EOS_PASSWORD: ${{ secrets.EOS_PASSWORD }}
   HOG_LD_LIBRARY_PATH: ${{ secrets.HOG_LD_LIBRARY_PATH }}
   HOG_SIMULATION_LIB_PATH: ${{ secrets.HOG_SIMULATION_LIB_PATH }}
-  HOG_CHECK_SYNTAX: ${{ secrets.HOG_CHECK_SYNTAX }}
-  HOG_CHECK_YAMLREF: ${{ secrets.HOG_CHECK_YAMLREF }}
-  HOG_NO_BITSTREAM: ${{ secrets.HOG_NO_BITSTREAM }}
-  HOG_NO_RESET_BD: ${{ secrets.HOG_NO_RESET_BD }}
   HOG_IP_PATH: ${{ secrets.HOG_IP_PATH }}
   HOG_RESET_FILES: ${{ secrets.HOG_RESET_FILES }}
-  HOG_TARGET_BRANCH: ${{ secrets.HOG_TARGET_BRANCH }}
   HOG_NJOBS: ${{ secrets.HOG_NJOBS }}
   HOG_IP_NJOBS: ${{ secrets.HOG_IP_NJOBS }}
-  HOG_USE_DOXYGEN: ${{ secrets.HOG_USE_DOXYGEN }}
   GH_TOKEN: ${{ secrets.HOG_PUSH_TOKEN }}
   HOG_PR_MSG: ${{ secrets.HOG_PR_MSG }}
+
 
 
 jobs:
@@ -104,23 +101,17 @@ jobs:
           git config --global user.email "$HOG_EMAIL"
           git config --global user.name "$HOG_USER"
           git fetch 
-          git checkout $SOURCE_BRANCH
+          git checkout $GITHUB_HEAD_REF
           git pull
           git submodule init
           git submodule update
-          echo $GITHUB_API_URL
-          echo $REPO
-          echo $PR_NUMBER
-          echo $SOURCE_BRANCH
-          echo $COMMIT_MESSAGE
-          echo $TARGET_BRANCH
-          PULL_PARAMETERS=`curl -H "Accept: application/vnd.github.v3+json" $GITHUB_API_URL/repos/$REPO/pulls/$PR_NUMBER --header  "Authorization: token ${HOG_PUSH_TOKEN}"`
-          tclsh ./Hog/Tcl/CI/merge_and_tag.tcl -github 1 -mr_par "$PULL_PARAMETERS" -mr_id $PR_NUMBER -main_branch $TARGET_BRANCH -source_branch $SOURCE_BRANCH -push $SOURCE_BRANCH -run_id $GITHUB_RUN_ID
+          PULL_PARAMETERS=`curl -H "Accept: application/vnd.github.v3+json" $GITHUB_API_URL/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER --header  "Authorization: token ${HOG_PUSH_TOKEN}"`
+          tclsh ./Hog/Tcl/CI/merge_and_tag.tcl -github 1 -mr_par "$PULL_PARAMETERS" -mr_id $PR_NUMBER -main_branch $GITHUB_BASE_REF -source_branch $GITHUB_HEAD_REF -push $GITHUB_HEAD_REF -run_id $GITHUB_RUN_ID
   make_doxygen:
     runs-on: ubuntu-latest
     container: gitlab-registry.cern.ch/hog/hog-docker:doxygen
     needs: merge
-    if: ${{ inputs.HOG_USE_DOXYGEN == '1' }}
+    if: ${{ inputs.HOG_USE_DOXYGEN }}
     steps:
       - uses: actions/checkout@v3
         name: Checkout Repository
@@ -135,7 +126,7 @@ jobs:
           git config --global user.email "$HOG_EMAIL"
           git config --global user.name "$HOG_USER"
           git fetch 
-          git checkout $SOURCE_BRANCH
+          git checkout $GITHUB_HEAD_REF
           git pull
           git submodule init
           git submodule update
@@ -182,7 +173,10 @@ jobs:
               export LD_LIBRARY_PATH=${HOG_LD_LIBRARY_PATH}:$LD_LIBRARY_PATH
               export PATH=${HOG_PATH}:$PATH
               ./Hog/Other/CheckEnv.sh
-              if [[ -v HOG_CHECK_PROJVER ]] && [[ $HOG_CHECK_PROJVER == '1' ]]; then
+              if [ -v "${{ secrets.EOS_MGM_URL}} "]; then
+                export EOS_MGM_URL=${{ secrets.EOS_MGM_URL }}
+              fi;
+              if [ ${inputs.HOG_CHECK_PROJVER }]; then
                 if [[ -z "$HOG_EXTERNAL_PATH" ]]; then
                   ./Hog/Other/CheckProjVer.sh $PROJECT_NAME;
                 else
@@ -207,15 +201,15 @@ jobs:
                     echo "Hog-CI(info) - IPs will be copied to/from $HOG_IP_EOS_PATH.";
                     export IP_PATH="-ip_path $HOG_IP_EOS_PATH";
                     if [[ $HOG_IP_EOS_PATH = /eos/* ]]; then
-                      echo "kinit $HOG_USER@CERN.CH";
-                      until echo $HOG_PASSWORD | kinit $HOG_USER@CERN.CH ; do echo "Retrying"; sleep 2; done;
+                      echo "kinit $EOS_USER@CERN.CH";
+                      until echo $EOS_PASSWORD | kinit $EOS_USER@CERN.CH ; do echo "Retrying"; sleep 2; done;
                     fi;
                   fi;
                 else
                   echo "Hog-CI(info) - IPs will be copied to/from $HOG_IP_PATH.";
                   export IP_PATH="-ip_path $HOG_IP_PATH";
                   if [[ $HOG_IP_PATH = /eos/* ]]; then
-                    until echo $HOG_PASSWORD | kinit $HOG_USER@CERN.CH ; do echo "Retrying"; sleep 2; done;
+                    until echo $EOS_PASSWORD | kinit $EOS_USER@CERN.CH ; do echo "Retrying"; sleep 2; done;
                   fi;
                 fi;
                 if [[ -n "$HOG_ONLY_SYNTH" ]] && [[ $HOG_ONLY_SYNTH == '1' ]]; then
@@ -223,7 +217,7 @@ jobs:
                   echo "Hog-CI(info) - Only the synthesis will be run.";
                 else
                   export ONLY_SYNTH="";
-                  if [[ -n "$HOG_NO_BITSTREAM" ]] && [[ $HOG_NO_BITSTREAM == '1' ]]; then
+                  if [ ${{ inputs.HOG_NO_BITSTREAM }}]; then
                     export NO_BITSTREAM="-no_bitstream";
                     echo "Hog-CI(info) - No binary files will be generated.";
                   else
@@ -231,7 +225,7 @@ jobs:
                     export NO_BITSTREAM="";
                   fi;
                 fi;
-                if [[ -n "$HOG_CHECK_SYNTAX" ]] && [[ $HOG_CHECK_SYNTAX == '1' ]]; then
+                if [ ${{ inputs.HOG_CHECK_SYNTAX }} ]; then
                   echo "Hog-CI(info) - HDL syntax will be checked before starting the syntehsis";
                   export CHECK_SYNTAX="-check_syntax";
                 else
@@ -239,7 +233,7 @@ jobs:
                   export CHECK_SYNTAX="";
                 fi;
                 
-                if [[ -n "$HOG_NO_RESET_BD" ]] && [[ $HOG_NO_RESET_BD == '1' ]]; then
+                if [ ${{ inputs.HOG_NO_RESET_BD }} ]; then
                   echo "Hog-CI(info) - BD files will NOT be reset at pre syntehsis time";
                 else
                   echo "Hog-CI(info) - BD files will be reset at pre-synthesis time";
@@ -281,7 +275,7 @@ jobs:
               fi;
               if [[ -n "$HOG_MR_MSG" ]] && [[ $HOG_MR_MSG == '3' ]]; then
                 echo "Hog-CI(info) - Writing note on gitlab website...";
-                ./Hog/Other/WriteGithubNote.sh $HOG_PUSH_TOKEN $GITHUB_API_URL $REPO $PR_NUMBER note.md;
+                ./Hog/Other/WriteGithubNote.sh $HOG_PUSH_TOKEN $GITHUB_API_URL $GITHUB_REPOSITORY $PR_NUMBER note.md;
               fi
               echo "Hog-CI(info) - All done.";
       - name: Archive Generate Artifacts
@@ -368,15 +362,15 @@ jobs:
               git config --global user.email "$HOG_EMAIL"
               git config --global user.name "$HOG_USER"
               git fetch
-              git checkout $SOURCE_BRANCH
+              git checkout $GITHUB_HEAD_REF
               git pull
               git submodule init
               git submodule update
               old_dir=$(pwd)
               mkdir -p Build-Artifacts
               mv Build-Artifacts bin
-              printf "## Repository info\n- Pull request number: $PR_NUMBER\n- Branch name: $SOURCE_BRANCH\n\n" > bin/note.md
-              ./Hog/Other/Changelog.sh -t $TARGET_BRANCH -pt $HOG_PUSH_TOKEN -r $REPO -github -n $PR_NUMBER >> bin/note.md
+              printf "## Repository info\n- Pull request number: $PR_NUMBER\n- Branch name: $GITHUB_HEAD_REF\n\n" > bin/note.md
+              ./Hog/Other/Changelog.sh -t $GITHUB_BASE_REF -pt $HOG_PUSH_TOKEN -r $GITHUB_REPOSITORY -github -n $PR_NUMBER >> bin/note.md
               cd bin
               diff_files=$(find . -name "diff_list*.txt");
               touch $old_dir/pr_note.md
@@ -406,7 +400,7 @@ jobs:
               cd $old_dir
               if [[ -z "$HOG_MR_MSG" ]] || [[ $HOG_MR_MSG == '1' ]] || [[ $HOG_MR_MSG == '2' ]]; then
                 echo "Hog-CI(info) - Writing note on GitHub website...";
-                ./Hog/Other/WriteGithubNote.sh $HOG_PUSH_TOKEN $GITHUB_API_URL $REPO $PR_NUMBER pr_note.md;
+                ./Hog/Other/WriteGithubNote.sh $HOG_PUSH_TOKEN $GITHUB_API_URL $GITHUB_REPOSITORY $PR_NUMBER pr_note.md;
               fi;
       - name: Artifacts
         uses: actions/upload-artifact@v3

@@ -28,14 +28,13 @@ on:
         required: false
       EOS_USER:
         required: false
+      EOS_MGM_URL:
+        required: false
         
 env:
   HOG_PUSH_TOKEN: ${{ secrets.HOG_PUSH_TOKEN }}
-  GITHUB_API_URL: ${{ github.api_url }}
-  REPO: ${{ github.repository }}
   HOG_USER: ${{ secrets.HOG_USER }}
   HOG_EMAIL: ${{ secrets.HOG_EMAIL }}
-  SOURCE_BRANCH: ${{ github.head_ref }}
 
 jobs:
   tag_official_version:
@@ -56,7 +55,7 @@ jobs:
           git config --global user.email "$HOG_EMAIL"
           git config --global user.name "$HOG_USER"
           git fetch 
-          git checkout $SOURCE_BRANCH
+          git checkout $GITHUB_HEAD_REF
           git pull
           commit_message=$(git show --pretty=format:"%B" --no-patch)
           echo "Removing merge commit..."
@@ -97,7 +96,7 @@ jobs:
           git config --global user.email "$HOG_EMAIL"
           git config --global user.name "$HOG_USER"
           git fetch 
-          git checkout $SOURCE_BRANCH
+          git checkout $GITHUB_HEAD_REF
           git pull
           git submodule init
           git submodule update
@@ -107,17 +106,22 @@ jobs:
             sleep 2;
             done;
           fi;
+          if [ -v "${{ secrets.EOS_MGM_URL}}" ]; then
+            export EOS_MGM_URL=${{ secrets.EOS_MGM_URL }}
+          else
+            export EOS_MGM_URL="root://eosuser.cern.ch"
+          fi;
           git fetch origin refs/notes/*:refs/notes/*
           RUNID=( `git notes show` )
           if [[ "${{ inputs.HOG_USE_DOXYGEN }}" == "1" ]]; then
-            ./Hog/Other/GetArtifactsAndRename.sh -token $HOG_PUSH_TOKEN -url $GITHUB_API_URL -proj_id $REPO -mr $RUNID -doxygen -github ;
+            ./Hog/Other/GetArtifactsAndRename.sh -token $HOG_PUSH_TOKEN -url $GITHUB_API_URL -proj_id $GITHUB_REPOSITORY -mr $RUNID -doxygen -github ;
             if [[ -v "${{ inputs.HOG_OFFICIAL_BIN_EOS_PATH }}" ]]; then
               echo "Copying Doxygen documentation to ${HOG_OFFICIAL_BIN_EOS_PATH}/Doc";
               eos mkdir -p ${{ inputs.HOG_OFFICIAL_BIN_EOS_PATH }}/Doc;
-              xrdcp -rsf Doc/html/* ${EOS_MGM_URL}//${HOG_OFFICIAL_BIN_EOS_PATH}/Doc;
+              xrdcp -rsf Doc/html/* ${EOS_MGM_URL}/${HOG_OFFICIAL_BIN_EOS_PATH}/Doc;
             fi;
           else
-            ./Hog/Other/GetArtifactsAndRename.sh -token $HOG_PUSH_TOKEN -url $GITHUB_API_URL -proj_id $REPO -mr $RUNID -github;
+            ./Hog/Other/GetArtifactsAndRename.sh -token $HOG_PUSH_TOKEN -url $GITHUB_API_URL -proj_id $GITHUB_REPOSITORY -mr $RUNID -github;
           fi
           if [[ -v "${{ inputs.HOG_OFFICIAL_BIN_EOS_PATH }}" ]]; then
             echo "Copying binary files to ${{inputs.HOG_OFFICIAL_BIN_EOS_PATH}}/${{ needs.tag_official_version.outputs.tag }}";
@@ -141,14 +145,13 @@ jobs:
           git config --global user.email "$HOG_EMAIL"
           git config --global user.name "$HOG_USER"
           git fetch 
-          echo ${{ needs.tag_official_version.outputs.tag }}
           git checkout ${{ needs.tag_official_version.outputs.tag }}
           git pull
           git submodule init
           git submodule update
           git fetch origin refs/notes/*:refs/notes/*
           RUNID=( `git notes show` )
-          ./Hog/Other/GetArtifactsAndRename.sh -token $HOG_PUSH_TOKEN -url $GITHUB_API_URL -proj_id $REPO -mr $RUNID -github;         
+          ./Hog/Other/GetArtifactsAndRename.sh -token $HOG_PUSH_TOKEN -url $GITHUB_API_URL -proj_id $GITHUB_REPOSITORY -mr $RUNID -github;         
           zip -r binaries.zip bin
       - name: Create Release
         id: create_release
