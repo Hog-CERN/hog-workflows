@@ -116,17 +116,15 @@ jobs:
           else
             export EOS_MGM_URL="root://eosuser.cern.ch"
           fi;
-          git fetch origin refs/notes/*:refs/notes/*
-          RUNID=( `git notes show` )
           if [[ "${{ inputs.HOG_USE_DOXYGEN }}" == "1" ]]; then
-            ./Hog/Other/GetArtifactsAndRename.sh -token $HOG_PUSH_TOKEN -url $GITHUB_API_URL -proj_id $GITHUB_REPOSITORY -mr $RUNID -doxygen -github ;
+            ./Hog/Other/GetArtifactsAndRename.sh -token $HOG_PUSH_TOKEN -url $GITHUB_API_URL -proj_id $GITHUB_REPOSITORY -mr ${{ needs.tag_official_version.outputs.runid}} -doxygen -github ;
             if [[ -v "${{ inputs.HOG_OFFICIAL_BIN_EOS_PATH }}" ]]; then
               echo "Copying Doxygen documentation to ${HOG_OFFICIAL_BIN_EOS_PATH}/Doc";
               eos mkdir -p ${{ inputs.HOG_OFFICIAL_BIN_EOS_PATH }}/Doc;
               xrdcp -rsf Doc/html/* ${EOS_MGM_URL}/${HOG_OFFICIAL_BIN_EOS_PATH}/Doc;
             fi;
           else
-            ./Hog/Other/GetArtifactsAndRename.sh -token $HOG_PUSH_TOKEN -url $GITHUB_API_URL -proj_id $GITHUB_REPOSITORY -mr $RUNID -github;
+            ./Hog/Other/GetArtifactsAndRename.sh -token $HOG_PUSH_TOKEN -url $GITHUB_API_URL -proj_id $GITHUB_REPOSITORY -mr ${{ needs.tag_official_version.outputs.runid}} -github;
           fi
           if [[ -v "${{ inputs.HOG_OFFICIAL_BIN_EOS_PATH }}" ]]; then
             echo "Copying binary files to ${{inputs.HOG_OFFICIAL_BIN_EOS_PATH}}/${{ needs.tag_official_version.outputs.tag }}";
