@@ -152,7 +152,7 @@ jobs:
           git pull
           git submodule init
           git submodule update
-          ./Hog/Other/GetArtifactsAndRename.sh -token $HOG_PUSH_TOKEN -url $GITHUB_API_URL -proj_id $REPO -mr ${{ needs.tag_official_version.outputs.runid}} -github;         
+          ./Hog/Other/GetArtifactsAndRename.sh -token $HOG_PUSH_TOKEN -url $GITHUB_API_URL -proj_id $GITHUB_REPOSITORY -mr ${{ needs.tag_official_version.outputs.runid}} -github;         
           zip -r binaries.zip bin
       - name: Create Release
         id: create_release
