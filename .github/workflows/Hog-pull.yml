@@ -27,6 +27,9 @@ on:
       HOG_CHECK_SYNTAX:
         required: false
         type: boolean
+      HOG_ONLY_SYNTH:
+        required: false
+        type: boolean
     secrets:
       SUBMODULE_CONTENT_PULL_KEY:
         required: true
@@ -172,11 +175,23 @@ jobs:
               export PATH=${HOG_PATH}:$PATH
               export LD_LIBRARY_PATH=${HOG_LD_LIBRARY_PATH}:$LD_LIBRARY_PATH
               export PATH=${HOG_PATH}:$PATH
+              if [ ${{inputs.HOG_CHECK_PROJVER}} ]; then
+                export HOG_CHECK_PROJVER = 1
+              fi;
+              if [ ${{inputs.HOG_CHECK_SYNTAX}} ]; then
+                export HOG_CHECK_SYNTAX = 1
+              fi;
+              if [ ${{inputs.HOG_USE_DOXYGEN}} ]; then
+                export HOG_USE_DOXYGEN = 1
+              fi;
+              if [ ${{ inputs.HOG_NO_BITSTREAM}}]; then
+                export HOG_NO_BITSTREAM = 1
+              fi
               ./Hog/Other/CheckEnv.sh
               if [ -v "${{ secrets.EOS_MGM_URL}} "]; then
                 export EOS_MGM_URL=${{ secrets.EOS_MGM_URL }}
               fi;
-              if [ ${inputs.HOG_CHECK_PROJVER }]; then
+              if [ ${{inputs.HOG_CHECK_PROJVER }} ]; then
                 if [[ -z "$HOG_EXTERNAL_PATH" ]]; then
                   ./Hog/Other/CheckProjVer.sh $PROJECT_NAME;
                 else
@@ -212,7 +227,7 @@ jobs:
                     until echo $EOS_PASSWORD | kinit $EOS_USER@CERN.CH ; do echo "Retrying"; sleep 2; done;
                   fi;
                 fi;
-                if [[ -n "$HOG_ONLY_SYNTH" ]] && [[ $HOG_ONLY_SYNTH == '1' ]]; then
+                if [ ${{ inputs.HOG_ONLY_SYNTH }}]; then
                   export ONLY_SYNTH="-synth_only";
                   echo "Hog-CI(info) - Only the synthesis will be run.";
                 else
